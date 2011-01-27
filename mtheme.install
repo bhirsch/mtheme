@@ -1,0 +1,136 @@
+<?php 
+/**
+ * @file
+ *  Install mtheme module.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function mtheme_install() {
+  drupal_install_schema('mtheme');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mtheme_uninstall() {
+  drupal_uninstall_schema('mtheme');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function mtheme_schema() {
+  $schema['mtheme_selector'] = array(
+    'description' => t('Table storing theme (myobj), definitions.'),
+    'export' => array(
+      'key' => 'name',
+      'key name' => 'Name',
+      'primary key' => 'sid',
+      'identifier' => 'selector', // Exports will be as $selector
+      'default hook' => 'default_mtheme_selector',  // Function hook name.
+      'api' => array(
+        'owner' => 'mtheme',
+        'api' => 'default_mtheme_selector',  // Base name for api include files.
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      // selector id 
+      'sid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('Primary ID field for the table. Not used for anything except internal lookups.'),
+        'no export' => TRUE, // Do not export database-only keys.
+      ),
+      // name (machine, unique id)
+      'name' => array(
+        'type' => 'varchar',  
+        'length' => 64,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Unique ID for this object. Used to identify it programmatically.'),
+      ),
+      // title (human readable)
+      'title' => array(
+        'type' => 'varchar',  
+        'length' => 64,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Human readable title.'),
+      ),
+      // group
+      'grp' => array(  // the word "group" causes problems, use grp instead
+        'type' => 'varchar',  
+        'length' => 64,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Organize selectors into groups, like Context tags or '
+                          .'module packages. Groups are included in CSS comments '
+                          .'above selectors.'),
+      ),
+      // description 
+      'description' => array(
+        'type' => 'varchar',  
+        'length' => 255,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Optional description of selector.'),
+      ),
+      /*
+      // CSS comment
+      'css_comment' => array(
+        'type' => 'varchar',  
+        'length' => 255,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Comment to include in .css file above selector.'),
+      ),
+      // */
+      // css selector 
+      'css_selector' => array(
+        'type' => 'varchar',  
+        'length' => 255,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('CSS selector. E.g. div or  div#example .demo '),
+      ),
+      // css properties
+      'css_properties' => array(
+        'type' => 'text',  
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('E.g. background-color: white; <br/> font-size: 12px; '),
+      ),
+      // selector weight 
+      'weight' => array(
+        'type' => 'int',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('CSS selector weight. If the same selector appears '
+                          .'multiple times, they will be writen to the style sheet '
+                          .'in order of weight (lightest first, heavest last).'),
+      ),
+    ),
+    'primary key' => array('sid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_update_N.
+ * 
+ * Add permission field.
+ */
+/*
+function mtheme_update_6001() {
+}
+// */

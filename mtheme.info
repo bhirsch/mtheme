@@ -1,0 +1,7 @@
+; $Id $
+name = Module Theme
+description = Expose module theming to site administrators through a GUI.
+core = 6.x
+version = "6.x-1.0"
+package = "Subtheme"
+project = "Module Theme"

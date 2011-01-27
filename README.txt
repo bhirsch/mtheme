@@ -1,0 +1,35 @@
+Module Theme
+--------------
+
+[TODO write readme documentation]
+
+
+This only works with the following line included in template.php
+
+$custom_css = file_directory_path() .'/mtheme/custom.css';
+if (file_exists($custom_css)) {
+  drupal_add_css($custom_css, 'theme', 'all', TRUE);
+}
+
+
+Comments like this: 
+------------------
+/**
+ * Group ======================================================
+ */
+
+/* selector title */
+#selector  
+{
+  property: value; /* comment from text area */
+  property2: value; /* comment from text area */ 
+}
+
+
+For Module Developers
+----------------------
+- write CSS with GUI
+- export as feature module: mymtheme
+- include mymtheme in your mymodule/ or mymodule/modules
+- include the CSS by declaring it in the .info file (or hook_init() if you're a rebel)
+- to enable/disable mymtheme when your module is enabled/disabled, use hook_enable and hook_disable

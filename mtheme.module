@@ -1,0 +1,229 @@
+<?php
+/**
+ * @file
+ *  
+ */
+ 
+//--------------------------------//
+// core Drupal hooks              //
+//--------------------------------//
+
+/**
+ * Implementation of hook_help()
+ */
+function mtheme_help($path, $arg) {
+  if ($path == 'admin/help#mtheme') {
+    $txt = 'Features Control Panel provides a.... [FINISH HELP TEXT] '; // TODO
+    $output = t($txt);
+    return $output;
+  }
+}
+ 
+/**
+ * Implementation of hook_menu().
+ */
+function mtheme_menu() {
+  $items['admin/build/mtheme/%/export'] = array(
+    'title' => 'export',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mtheme_export_selector', 3),
+    'access arguments' => array('mtheme export'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function mtheme_perm() {
+  return array('mtheme export', 'administer mtheme');
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function mtheme_theme() {
+  return array(
+    'mtheme_selector' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function mtheme_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'mtheme') { 
+    // admin/build/mtheme/add
+    if (arg(3) == 'add' ||
+      // admin/build/mtheme/list/selector_name/edit
+      (arg(3) == 'list' && arg(5) == 'edit')) {
+      // Call mtheme functions after new selectors are added or saved.
+      // $form['#validate'][] = 'mtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
+     ctools_include('css', 'mtheme'); // include includes/css.inc
+      $form['#submit'][] = 'mtheme_ctools_export_ui_edit_item_form_submit';
+    }
+  }
+}
+
+//----------------------------------------------//
+// mtheme                                       //
+//----------------------------------------------//
+
+/**
+ * @param $selectors
+ *  array, optionally save mtheme_get_groups the work of calling
+ *  ctools_export_load_object.
+ * 
+ * @return $groups
+ *  array, selectors organized by group 
+ *
+ * $groups[$i]['group_name'] = $group_name
+ * $groups[$i]['group_title'] = $group_title; 
+ * $groups[$i]['selectors'][$selector]
+ */
+function mtheme_get_groups($selectors = NULL) {
+  ctools_include('export');
+  if (!$selectors) {
+    $selectors = ctools_export_load_object('mtheme_selector');
+  } 
+  // Make a unique list of groups;
+  foreach($selectors as $selector) {
+    $group_title = $selector->grp;
+    $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
+    $list[$group] = $group_title;
+  }
+  // Sort group list in alphabetical order by $group_title.
+  asort($list);
+  // Number groups.
+  $groups = array();
+  $i = 0;
+  foreach($list as $group => $group_title) {
+    $groups[$i]['group_name'] = $group;
+    $groups[$i]['group_title'] = $group_title;
+    // Organize selectors by group.
+    foreach($selectors as $selector) {
+      if($selector->grp == $group_title) {
+        $groups[$i]['selectors'][] = $selector;
+      } 
+    }
+    // default, sort alphabetical (handle sort by weight elsewhere)
+    sort($groups[$i]['selectors']);
+    $i++;
+  }
+  
+  return $groups;
+}
+
+//--------------------------------------------------/
+// Ctools plugin                                    /
+//--------------------------------------------------/
+/**
+ * Implmenentation of hook_ctools_plugin_directory.
+ */
+function mtheme_ctools_plugin_directory($module, $plugin) {
+  if ($plugin == 'export_ui') {
+    return 'plugins/'. $plugin;
+  }
+}
+
+/**
+* Implementation of hook_ctools_plugin_api().
+*
+* Tell CTools that we support the default_mymodule_presets API.
+*/
+function mtheme_ctools_plugin_api($owner, $api) {
+  if ($owner == 'mtheme' && $api == 'default_mtheme_selector') {
+    return array('version' => 1);
+  }
+}
+
+//--------------------------------------------------/
+// Ctools export hooks                              /
+//--------------------------------------------------/
+
+/**
+ * Export a myobj and display it in a form.
+ * 
+ * @param $name
+ *  string, unique id for object
+ */
+function mtheme_export_selector(&$form_state, $name) {
+  ctools_include('export');
+  $obj = mtheme_selector_load($name);
+  drupal_set_title(check_plain($obj->description));
+  $code = mtheme_selector_export($obj);
+  $lines = substr_count($code, "\n");
+
+  $form['export'] = array(
+    '#title' => t('Export data'),
+    '#type' => 'textarea',
+    '#value' => $code,
+    '#rows' => $lines,
+    '#description' => t('Copy the export text and paste it into another myobj using the import function.'),
+  );
+  return $form;
+}
+
+/**
+ * Load a single myobj.
+ */
+function mtheme_selector_load($name) {
+  ctools_include('export');
+  $result = ctools_export_load_object('mtheme_selector', 'names', array($name)); 
+  if (isset($result[$name])) {
+    return $result[$name];
+  }
+}
+
+/**
+ * Export a myobj.
+ */
+function mtheme_selector_export($obj, $indent = '') {
+  ctools_include('export');
+  $output = ctools_export_object('mtheme_selector', $obj, $indent);
+  return $output;
+}
+
+/**
+ * Save a single myobj.
+ */
+// TODO 
+function mtheme_selector_save(&$myobj) {
+    $update = (isset($myobj->oid) && is_numeric($myobj->oid)) ? array('oid') : array();
+      return drupal_write_record('myobj', $myobj, $update);
+}
+
+
+
+//-------------------------------------------------/
+// Features hooks                                  /
+//-------------------------------------------------/
+/**
+ * Implementation of hook_features_api().
+ */
+// TODO 
+
+/**
+ * Implementation of hook_features_export().
+ */
+// TODO 
+
+/**
+ * Implementation of hook_features_export_render().
+ */
+// TODO 
+
+/**
+ * Implementation of hook_features_export_options().
+ */
+// TODO 
+
+/**
+ * Implementation of hook_features_revert().
+ */
+// TODO 
+
