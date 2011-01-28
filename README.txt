@@ -6,9 +6,9 @@ Module Theme
 
 This only works with the following line included in template.php
 
-$custom_css = file_directory_path() .'/mtheme/custom.css';
-if (file_exists($custom_css)) {
-  drupal_add_css($custom_css, 'theme', 'all', TRUE);
+$mtheme_css = file_directory_path() .'/mtheme/mtheme.css';
+if (file_exists($mtheme_css)) {
+  drupal_add_css($mtheme_css, 'theme', 'all', TRUE);
 }
 
 

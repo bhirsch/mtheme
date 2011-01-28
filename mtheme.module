@@ -63,12 +63,49 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
       (arg(3) == 'list' && arg(5) == 'edit')) {
       // Call mtheme functions after new selectors are added or saved.
       // $form['#validate'][] = 'mtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
-     ctools_include('css', 'mtheme'); // include includes/css.inc
+      ctools_include('css', 'mtheme'); // include includes/css.inc
       $form['#submit'][] = 'mtheme_ctools_export_ui_edit_item_form_submit';
     }
   }
 }
 
+/**
+ * Implementation of hook_modules_enabled().
+ * 
+ * If a module implementing default_mtheme_selector is 
+ * enabled, re-write mtheme.css.
+ */
+function mtheme_modules_enabled($modules) {
+  foreach($modules as $module) {
+    $path = drupal_get_path('module', $module);
+    $filename = $path ."/{$module}.info";
+    $info = drupal_parse_info_file($filename);
+    if ($info['features']['mtheme_selector']) {
+dsm("testing, mtheme_modules_enabled: {$module}");
+      mtheme_css(); // @todo add error handling here.
+      clear_cache_all();
+    }
+  }
+}
+
+/**
+ * Implementation of hook_modules_disabled().
+ * 
+ * If a module implementing default_mtheme_selector is 
+ * disabled, re-write mtheme.css.
+ */
+function mtheme_modules_disabled($modules) {
+  foreach($modules as $module) {
+    $path = drupal_get_path('module', $module);
+    $filename = $path ."/{$module}.info";
+    $info = drupal_parse_info_file($filename);
+    if ($info['features']['mtheme_selector']) {
+dsm("testing, mtheme_modules_disabled: {$module}");
+      mtheme_css(); // @todo add error handling here.
+      clear_cache_all();
+    }
+  }
+}
 //----------------------------------------------//
 // mtheme                                       //
 //----------------------------------------------//
@@ -225,5 +262,16 @@ function mtheme_selector_save(&$myobj) {
 /**
  * Implementation of hook_features_revert().
  */
-// TODO 
+/*
+function mtheme_features_export_revert($module_name) {
+print("mtheme_features_export_revert here: \n");
+print_r($module_name, TRUE);
+  $mycomponents = module_invoke_all($module_name, 'selector_defaults');
+  if (!empty($$mycomponents)) {
+    foreach ($mycomponents as $mycomponent) {
+      mycomponent_delete($mycomponent);
+    }
+  }
+}
+// */
 

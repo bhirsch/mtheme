@@ -2,8 +2,37 @@
 /**
  * @file mtheme/includes/css.inc
  *  This file contains all the functions that write
- *  custom CSS for the mtheme module.
+ *  CSS for the mtheme module.
  */
+
+/**
+ * (Re-)Write files/mtheme/mtheme.css.
+ */
+function mtheme_css() {
+  $css = mtheme_generate_css();   
+  $written = mtheme_write_css($css);
+  if (!$written) {
+    // TODO handle error here. Notify user.  
+  }
+}
+
+/**
+ * When a selector is saved (added or edited)
+ * re-write css to include new selector. 
+ * 
+ * @todo There's probably a more efficient way to do this than
+ * re-writing the CSS after each new selector is saved, but 
+ * for now, doing it this way keeps it simple. 
+ * 
+ * There is no extravagant naming convention magic here.
+ * This function is just called mymodule_ctoolform_submit, that is
+ * mtheme _ ctools_export_ui_edit_item_form _ submit.
+ */
+function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
+  //$selector = $form_state['item'];
+  //dsm($selector);
+  mtheme_css(); // @todo add error handling here.
+}
 
 /**
  * Get all the mtheme CSS selectors,
@@ -95,30 +124,9 @@ function _mtheme_start_css() {
   return $css; 
 }
 
-/**
- * When a selector is saved (added or edited)
- * re-write css to include new selector. 
- * 
- * @todo There's probably a more efficient way to do this than
- * re-writing the CSS after each new selector is saved, but 
- * for now, doing it this way keeps it simple. 
- * 
- * There is no extravagant naming convention magic here.
- * This function is just called mymodule_ctoolform_submit, that is
- * mtheme _ ctools_export_ui_edit_item_form _ submit.
- */
-function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
-  //$selector = $form_state['item'];
-  //dsm($selector);
-  $css = mtheme_generate_css();   
-  $written = mtheme_write_css($css);
-  if (!$written) {
-    // TODO handle error here. Notify user.  
-  }
-}
 
 /**
- * Compose custom.css based on settings entered by user.
+ * Compose mtheme.css based on settings entered by user.
  */
 function mtheme_compose_css($a) {
     // write CSS
@@ -135,12 +143,12 @@ function mtheme_compose_css($a) {
 }
 
 /**
- * Write custom.css and store it 
- * in files/mtheme/custom.css.
+ * Write mtheme.css and store it 
+ * in files/mtheme/mtheme.css.
  */ 
 function mtheme_write_css($file_contents) {
-  // Set the location of the custom.css file
-  $file_path = file_directory_path() .'/mtheme/custom.css';
+  // Set the location of the mtheme.css file
+  $file_path = file_directory_path() .'/mtheme/mtheme.css';
 
   // If the directory doesn't exist, create it
   $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
@@ -157,7 +165,7 @@ function mtheme_write_css($file_contents) {
   }
 
   // Notify user about new CSS 
-  $txt = t('New custom CSS file created: !file',
+  $txt = t('New CSS file created: !file',
           array('!file' => l($file_path, $file_path)));
 
   drupal_set_message($txt);
