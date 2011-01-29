@@ -46,17 +46,23 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
  *  object, new mtheme_selector
  */
 function mtheme_generate_css($new_selector = NULL) {
-  $groups = mtheme_get_groups();
   $css = _mtheme_start_css();
-  foreach ($groups as $group) {
-    $css = _mtheme_group_comment($css, $group); 
-    foreach ($group['selectors'] as $selector) {
-      if ($selector->grp == $group['group_title'] && $selector->name != $new_selector->name) {
-        $css = _mtheme_write_selector_css($css, $selector); 
-      } else { // A selector is being updated. Use the new one.
-        $css = _mtheme_write_selector_css($css, $new_selector); 
-      } 
+  if ($groups = mtheme_get_groups()) {
+    foreach ($groups as $group) {
+      $css = _mtheme_group_comment($css, $group); 
+      foreach ($group['selectors'] as $selector) {
+        if ($selector->grp == $group['group_title'] && $selector->name != $new_selector->name) {
+          $css = _mtheme_write_selector_css($css, $selector); 
+        } else { // A selector is being updated. Use the new one.
+          $css = _mtheme_write_selector_css($css, $new_selector); 
+        } 
+      }
     }
+  } else if ($new_selector) { // there's only a new $selector
+    $css = _mtheme_write_selector_css($css, $new_selector); 
+  } else {
+    $txt = t('there are no mtheme modules enabled');
+    $css .= "\n  /* $txt */ ";
   }
 
   return $css; 
