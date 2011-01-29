@@ -75,6 +75,8 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
  * If a module implementing default_mtheme_selector is 
  * enabled, re-write mtheme.css.
  */
+/*
+// @todo Oops. This function is only available in D7.
 function mtheme_modules_enabled($modules) {
   foreach($modules as $module) {
     $path = drupal_get_path('module', $module);
@@ -87,6 +89,7 @@ dsm("testing, mtheme_modules_enabled: {$module}");
     }
   }
 }
+// */
 
 /**
  * Implementation of hook_modules_disabled().
@@ -94,6 +97,8 @@ dsm("testing, mtheme_modules_enabled: {$module}");
  * If a module implementing default_mtheme_selector is 
  * disabled, re-write mtheme.css.
  */
+/*
+// @todo Oops. This function is only available in D7.
 function mtheme_modules_disabled($modules) {
   foreach($modules as $module) {
     $path = drupal_get_path('module', $module);
@@ -106,6 +111,8 @@ dsm("testing, mtheme_modules_disabled: {$module}");
     }
   }
 }
+// */
+
 //----------------------------------------------//
 // mtheme                                       //
 //----------------------------------------------//
@@ -127,32 +134,36 @@ function mtheme_get_groups($selectors = NULL) {
   if (!$selectors) {
     $selectors = ctools_export_load_object('mtheme_selector');
   } 
-  // Make a unique list of groups;
-  foreach($selectors as $selector) {
-    $group_title = $selector->grp;
-    $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
-    $list[$group] = $group_title;
-  }
-  // Sort group list in alphabetical order by $group_title.
-  asort($list);
-  // Number groups.
-  $groups = array();
-  $i = 0;
-  foreach($list as $group => $group_title) {
-    $groups[$i]['group_name'] = $group;
-    $groups[$i]['group_title'] = $group_title;
-    // Organize selectors by group.
+  if ($selectors) {
+    // Make a unique list of groups;
     foreach($selectors as $selector) {
-      if($selector->grp == $group_title) {
-        $groups[$i]['selectors'][] = $selector;
-      } 
+      $group_title = $selector->grp;
+      $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
+      $list[$group] = $group_title;
     }
-    // default, sort alphabetical (handle sort by weight elsewhere)
-    sort($groups[$i]['selectors']);
-    $i++;
+    // Sort group list in alphabetical order by $group_title.
+    asort($list);
+    // Number groups.
+    $groups = array();
+    $i = 0;
+    foreach($list as $group => $group_title) {
+      $groups[$i]['group_name'] = $group;
+      $groups[$i]['group_title'] = $group_title;
+      // Organize selectors by group.
+      foreach($selectors as $selector) {
+        if($selector->grp == $group_title) {
+          $groups[$i]['selectors'][] = $selector;
+        } 
+      }
+      // default, sort alphabetical (handle sort by weight elsewhere)
+      sort($groups[$i]['selectors']);
+      $i++;
+    }
+    
+    return $groups;
+  } else {
+    return FALSE;
   }
-  
-  return $groups;
 }
 
 //--------------------------------------------------/
@@ -252,7 +263,24 @@ function mtheme_selector_save(&$myobj) {
 /**
  * Implementation of hook_features_export_render().
  */
-// TODO 
+function mtheme_selector_features_export_render($module_name, $data, $export = NULL) {
+  // TODO Write an implementation of hook_enable here to re-write CSS.
+  //      This will not be necessary in D7. mtheme will be able to call 
+  //      hook_modules_enabled() to listen for events like this. 
+
+  // This writes implementation of hook_default_mtheme_selector just as features/ctools
+  // would do if there were no implementation of hook_features_export render here.
+  $code = array();
+  $code[] = '$export = array();';
+  foreach ($data as $name) {
+    $selector = mtheme_selector_load($name);
+    $code[] = mtheme_selector_export($selector);
+    $code[] = "  \$export['{$name}'] = \$selector;";
+  }
+  $code[] = '  return $export;';
+  $code = implode("\n", $code);
+  return array('default_mtheme_selector' => $code);
+}
 
 /**
  * Implementation of hook_features_export_options().

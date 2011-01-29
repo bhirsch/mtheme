@@ -7,9 +7,12 @@
 
 /**
  * (Re-)Write files/mtheme/mtheme.css.
+ * 
+ * @param $selector
+ *  object, new mtheme_selector 
  */
-function mtheme_css() {
-  $css = mtheme_generate_css();   
+function mtheme_css($selector = NULL) {
+  $css = mtheme_generate_css($selector);   
   $written = mtheme_write_css($css);
   if (!$written) {
     // TODO handle error here. Notify user.  
@@ -29,9 +32,8 @@ function mtheme_css() {
  * mtheme _ ctools_export_ui_edit_item_form _ submit.
  */
 function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
-  //$selector = $form_state['item'];
-  //dsm($selector);
-  mtheme_css(); // @todo add error handling here.
+  $selector = $form_state['item'];
+  mtheme_css($selector); // @todo add error handling here.
 }
 
 /**
@@ -39,19 +41,21 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
  * organize them into groups,
  * sort by weight (withing groups), // @todo add weights to groups?
  * print CSS.  
+ * 
+ * @param $selector
+ *  object, new mtheme_selector
  */
-function mtheme_generate_css() {
+function mtheme_generate_css($new_selector = NULL) {
   $groups = mtheme_get_groups();
-//dsm($groups, '$groups');
   $css = _mtheme_start_css();
   foreach ($groups as $group) {
-//dsm($group, 'foreach ($groups as $group)');
     $css = _mtheme_group_comment($css, $group); 
     foreach ($group['selectors'] as $selector) {
-//dsm($selector, 'foreach($selectors as $selector)');
-      if ($selector->grp == $group['group_title']) {
+      if ($selector->grp == $group['group_title'] && $selector->name != $new_selector->name) {
         $css = _mtheme_write_selector_css($css, $selector); 
-      }   
+      } else { // A selector is being updated. Use the new one.
+        $css = _mtheme_write_selector_css($css, $new_selector); 
+      } 
     }
   }
 
