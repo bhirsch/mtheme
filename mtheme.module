@@ -253,17 +253,24 @@ function mtheme_selector_save(&$myobj) {
 /**
  * Implementation of hook_features_api().
  */
-// TODO 
+/*
+function mtheme_features_api() {
+}
+// */
 
 /**
  * Implementation of hook_features_export().
  *
  * Component hook.
  */
-  /*
 function mtheme_selector_features_export($data, &$export, $module_name) {
   foreach ($data as $component) {
-    $export['mycomponent'][$component] = $component;
+    $export['features']['mtheme_selector'][$component] = $component;
+    // $export['stylesheets']['all'][$component] = $component .'.css'; 
+    // @todo for some reason features components need associative arrays
+    // to come out right in the .info file. Stylesheet components 
+    // seem to need numerical arrays.  
+    $export['stylesheets']['all'][] = $component .'.css'; 
   }
   return array();
 }
