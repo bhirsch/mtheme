@@ -118,6 +118,33 @@ dsm("testing, mtheme_modules_disabled: {$module}");
 //----------------------------------------------//
 
 /**
+ * Add mtheme css files.
+ */
+function mtheme_add_css() {
+  // First load style sheets stored in features modules.
+  $features = features_get_features();
+  foreach ($features as $feature) {
+    if ($feature->info['features']['mtheme_selector'] 
+    && $stylesheets = $feature->info['stylesheets']) {
+      $path = drupal_get_path('module', $feature->name);
+      foreach($stylesheets['all'] as $stylesheet) {
+        $stylesheet = "$path/$feature->name.$stylesheet";
+        drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+        //drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+        //drupal_add_css($stylesheet);
+      } 
+    }  
+  }
+  // Then load stylesheets overridden through the GUI. 
+  $path = file_directory_path() .'/mtheme';  
+  foreach (@file_scan_directory($path, '.*') as $file) {
+    if (substr($file->basename, -3) == 'css' && $file->name != 'mtheme') {
+      drupal_add_css($file->filename, 'theme', 'all', TRUE);
+    }
+  }
+}
+
+/**
  * @param $selectors
  *  array, optionally save mtheme_get_groups the work of calling
  *  ctools_export_load_object.
@@ -274,7 +301,40 @@ function mtheme_selector_features_export($data, &$export, $module_name) {
   }
   return array();
 }
-  // */
+
+/**
+ * Implementation of hook_features_files().
+ * 
+ * @todo This hook is provided by a patched version of 
+ * Features. See http://github.com/bhirsch/features.
+ */
+function mtheme_features_files($export) {
+  $add_files = array();
+  if ($mtheme_selectors = $export['features']['mtheme_selector']) {
+    // Get css files for each component. 
+    $i = 0;
+    $mtheme_path = file_directory_path() .'/mtheme';
+    foreach ($mtheme_selectors as $name) {
+      // Get selector's CSS file
+      $add_files[$i]->name = $name;
+      $add_files[$i]->basename = $name .'.css'; 
+      $add_files[$i]->filename = $mtheme_path .'/'. $name .'.css';
+      $add_files[$i]->subdir = '';
+      // TODO Check for images.
+      $images_path = $mtheme_path .'/images/'. $name;
+      foreach (@file_scan_directory($images_path, '.*') as $file) {
+        $i++;
+        $add_files[$i]->name = $file->name;
+        $add_files[$i]->basename = $file->basename;
+        $add_files[$i]->filename = $file->filename;
+        $add_files[$i]->subdir = 'images/'. $name;
+      }
+      // TODO Step 6. Update theme.module and try it for real.
+      $i++;
+    }
+  }
+  return $add_files;
+}
 
 /**
  * Implementation of hook_features_export_render().

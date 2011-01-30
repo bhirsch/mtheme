@@ -5,7 +5,12 @@ Module Theme
 
 
 This only works with the following line included in template.php
+New version:
+if (module_exists('mtheme')) {
+  mtheme_add_css();  
+}
 
+Legacy: 
 $mtheme_css = file_directory_path() .'/mtheme/mtheme.css';
 if (file_exists($mtheme_css)) {
   drupal_add_css($mtheme_css, 'theme', 'all', TRUE);

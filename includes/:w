@@ -185,7 +185,7 @@ function mtheme_write_css($css) {
   $file_contents = $css['css'];
   $name = $css['name'];
   // Set the location of the mtheme.css file
-  $file_path = file_directory_path() .'/mtheme/'. $name .'.css';
+  $file_path = file_directory_path() .'/mtheme/mtheme.css';
 
   // If the directory doesn't exist, create it
   $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
