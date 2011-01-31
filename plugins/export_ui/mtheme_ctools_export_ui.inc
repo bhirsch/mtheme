@@ -37,7 +37,7 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
   $selector = $form_state['item'];
 
   // mtheme's configuration interface.
-  /* Apparently Ctools includes this field automatically on its own.
+  /* Ctools includes this field automatically on its own.
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Machine Name'),
@@ -69,6 +69,48 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#description' => t('E.g. background-color: white; <br/> font-size: 12px; '),
     '#required' => true,
   );
+  // Include files field group for uploading background images
+  // Include enctype, otherwise uploads won't work!
+  if (arg(5) == 'edit') { // Only add files after first save, we need a name.
+    $form['#attributes'] = array('enctype' => 'multipart/form-data');
+    $form['files'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Files'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['files']['file'] = array(
+      '#type' => 'file',
+      '#title' => t('Files'),
+      '#size' => 30,
+      '#element_validate' => array('mtheme_save_files'),
+    );
+    // Check for available files
+
+    $name = arg(4);
+    $path = file_directory_path() .'/mtheme/images/'. $name;  
+    $i = 0; // Use counter in case of conflicting $file->basename values
+    foreach (@file_scan_directory($path, '.*') as $file) {
+      $title = "images/$name/$file->basename";
+      $link = l($title, $file->filename);
+      // Add form items
+      $item = $file->basename .'-'. $i;
+      $form['files'][$item] = array(
+        '#type' => 'item',
+        '#title' => t("File "). $i,
+        '#value' => $link,
+        '#description' => t("Add this file to you CSS like this: "
+                           ."background: url('". $title ."');"),
+      );
+      $i++; 
+    }
+  } else if (arg(3) == 'add') {  
+    $form['files'] = array(
+      '#type' => 'item',
+      '#title' => t('Files'),
+      '#value' => t('Save then click Edit to add background files here.'),
+    );  
+  }
   $form['grp'] = array(
     '#type' => 'textfield',
     '#title' => t('CSS Selector Group'),

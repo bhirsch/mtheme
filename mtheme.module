@@ -130,13 +130,12 @@ function mtheme_add_css() {
   $features = features_get_features();
   foreach ($features as $feature) {
     if ($feature->info['features']['mtheme_selector'] 
+    && $feature->status == 1
     && $stylesheets = $feature->info['stylesheets']) {
       $path = drupal_get_path('module', $feature->name);
       foreach($stylesheets['all'] as $stylesheet) {
         $stylesheet = "$path/$feature->name.$stylesheet";
         drupal_add_css($stylesheet, 'theme', 'all', TRUE);
-        //drupal_add_css($stylesheet, 'theme', 'all', TRUE);
-        //drupal_add_css($stylesheet);
       } 
     }  
   }
@@ -294,8 +293,13 @@ function mtheme_features_api() {
  * Implementation of hook_features_export().
  *
  * Component hook.
+ * 
+ * Add elements to .info file.
  */
 function mtheme_selector_features_export($data, &$export, $module_name) {
+  // Add ctools default hook.
+  $export['features']['ctools']["mtheme:default_mtheme_selector:1"] = "mtheme:default_mtheme_selector:1";
+  // Add mtheme_selector objects
   foreach ($data as $component) {
     $export['features']['mtheme_selector'][$component] = $component;
     // $export['stylesheets']['all'][$component] = $component .'.css'; 
@@ -313,7 +317,7 @@ function mtheme_selector_features_export($data, &$export, $module_name) {
  * @todo This hook is provided by a patched version of 
  * Features. See http://github.com/bhirsch/features.
  */
-function mtheme_features_files($export) {
+function mtheme_features_files($export, $module_name) {
   $add_files = array();
   if ($mtheme_selectors = $export['features']['mtheme_selector']) {
     // Get css files for each component. 
@@ -321,8 +325,8 @@ function mtheme_features_files($export) {
     $mtheme_path = file_directory_path() .'/mtheme';
     foreach ($mtheme_selectors as $name) {
       // Get selector's CSS file
-      $add_files[$i]->name = $name;
-      $add_files[$i]->basename = $name .'.css'; 
+      $add_files[$i]->name = $module_name .'.'. $name;
+      $add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
       $add_files[$i]->filename = $mtheme_path .'/'. $name .'.css';
       $add_files[$i]->subdir = '';
       // TODO Check for images.
