@@ -145,28 +145,74 @@ dsm("testing, mtheme_modules_disabled: {$module}");
 
 /**
  * Add mtheme css files.
+ *
+ * @TODO Find out if Ctools is caching these objects. 
+ *  Seems expensive to load them all each time to 
+ *  check if enabled features have disabled selectors. 
+ * 
+ * Get all mtheme selectors
+ *  
+ *  $selectors
+ *     |
+ *     |
+ *  +--------------+
+ *  |              |
+ * disabled    (enabled)
+ *                 |
+ *        +---------------+
+ *        |               |
+ *  in code only          |
+ *                        | 
+ *                   in database
+ * 
  */
 function mtheme_add_css() {
-  // First load style sheets stored in features modules.
-  $features = features_get_features();
-  foreach ($features as $feature) {
-    if ($feature->info['features']['mtheme_selector'] 
-    && $feature->status == 1
-    && $stylesheets = $feature->info['stylesheets']) {
-      $path = drupal_get_path('module', $feature->name);
-      foreach($stylesheets['all'] as $stylesheet) {
-        $stylesheet = "$path/$feature->name.$stylesheet";
-        drupal_add_css($stylesheet, 'theme', 'all', TRUE);
-      } 
-    }  
-  }
-  // Then load stylesheets overridden through the GUI. 
-  $path = file_directory_path() .'/mtheme';  
-  foreach (@file_scan_directory($path, '.*') as $file) {
-    if (substr($file->basename, -3) == 'css' && $file->name != 'mtheme') {
-      drupal_add_css($file->filename, 'theme', 'all', TRUE);
+  // Get selectors from Ctools.
+  ctools_include('export');
+  $selectors = ctools_export_load_object('mtheme_selector');
+  $selectors = (array) $selectors;
+
+  $disabled = array();
+  $in_code_only = array();
+  $in_database = array();
+  foreach ($selectors as $selector) {
+    $name = $selector->name;
+    if ($selector->disabled) { 
+      $disabled[] = $name;
+    }
+    if ($selector->in_code_only) {
+      $in_code_only[] = $name;  
+    }
+    if (!in_array($name, $in_code_only)) {
+      $in_database[] = $name; 
     }
   }
+     
+  // Load style sheets in code (features modules).
+  $features = features_get_features();
+  foreach ($features as $feature) {
+    // Make sure the feature module is enabled and has mtheme selectors.
+    if ($feature->info['features']['mtheme_selector'] && $feature->status == 1) {
+      $module_name = $feature->name;
+      // Check each selector.
+      foreach ($feature->info['features']['mtheme_selector'] as $name) {
+        if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
+          $path = drupal_get_path('module', $module_name);
+          $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
+          drupal_add_css($stylesheet, 'theme', 'all', TRUE);  //  need stylesheets in 
+        }                                                     //  .info files anymore?
+      } 
+    }
+  }
+
+  // Load style sheets from files directory (in CSS in database)
+  foreach ($in_database as $name) {
+    if (!in_array($name, $disabled)) {
+      $stylesheet = file_directory_path() ."/mtheme/$name.css";
+      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+    }  
+  }
+  
 }
 
 /**
@@ -327,7 +373,7 @@ function mtheme_selector_features_export($data, &$export, $module_name) {
     // @todo for some reason features components need associative arrays
     // to come out right in the .info file. Stylesheet components 
     // seem to need numerical arrays.  
-    $export['stylesheets']['all'][] = $component .'.css'; 
+    $export['stylesheets']['all'][] = $module_name .'.'. $component .'.css'; 
   }
   return array();
 }
