@@ -56,6 +56,7 @@ function mtheme_theme() {
  * Implementation of hook_form_alter().
  */
 function mtheme_form_alter(&$form, &$form_state, $form_id) {
+  // Modify forms for adding and editing mtheme objects
   if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'mtheme') { 
     // admin/build/mtheme/add
     if (arg(3) == 'add' ||
@@ -66,6 +67,10 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
       ctools_include('css', 'mtheme'); // include includes/css.inc
       $form['#submit'][] = 'mtheme_ctools_export_ui_edit_item_form_submit';
     }
+  // Modify forms for deleting and reverting mtheme objects
+  } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'mtheme') {
+    ctools_include('css', 'mtheme'); // include includes/css.inc
+    $form['#submit'][] = 'mtheme_ctools_export_ui_delete_confirm_form_submit';
   }
 }
 

@@ -43,6 +43,16 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
 }
 
 /**
+ * When a selector is deleted or reverted,
+ * delete the files/mtheme/myselector.css.
+ */
+function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state) {
+  $name = $form_state['item']->name;
+  $path = file_directory_path() ."/mtheme/$name.css";
+  file_delete($path);
+}
+
+/**
  * Generate CSS for a single selector
  * or for all mtheme selectors.
  *
