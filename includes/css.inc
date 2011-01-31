@@ -60,6 +60,24 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
 }
 
 /**
+ * Callback for admin/build/mtheme/css.
+ * 
+ * Generate all CSS and display as a single style sheet.
+ */
+function mtheme_css_page() {
+  $txt = t('The style sheet below displays the current '
+    .'state of all your Module Theme CSS selectors compiled into '
+    .'a single style sheet.');
+  drupal_set_message($txt);
+
+  $css = mtheme_generate_css(FALSE, TRUE);  
+  $output = theme('mtheme_css_page', $css);
+
+  return $output;
+}
+
+
+/**
  * Save image files.
  * 
  * Callback for #element_validate on 

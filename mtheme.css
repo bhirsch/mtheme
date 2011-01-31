@@ -11,6 +11,12 @@
   border-bottom:solid 3px #F4F4F4;
 }
 
+.mtheme-css-page 
+{ 
+  border: 1px solid black; 
+  padding: 15px;
+}
+
 /**
  * Customize Ctools Export UI: admin/build/mtheme ===================
  */

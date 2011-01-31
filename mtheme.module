@@ -30,6 +30,13 @@ function mtheme_menu() {
     'access arguments' => array('mtheme export'),
     'type' => MENU_CALLBACK,
   );
+  $items['admin/build/mtheme/css'] = array(
+    'title' => t('CSS'),
+    'page callback' => 'mtheme_css_page',
+    'access arguments' => array('administer mtheme'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/css.inc',
+  );
 
   return $items;
 }
@@ -46,10 +53,24 @@ function mtheme_perm() {
  */
 function mtheme_theme() {
   return array(
-    'mtheme_selector' => array(
-      'arguments' => array('element' => NULL),
+   // 'mtheme_selector' => array(
+   //   'arguments' => array('element' => NULL),
+   // ),
+    'mtheme_css_page' => array(
+      'css' => array('css' => NULL),
     ),
   );
+}
+
+/**
+ * Theme function for admin/build/mtheme/css.
+ */
+function theme_mtheme_css_page($css) {
+  $path = drupal_get_path('module', 'mtheme') .'/mtheme.css';
+  drupal_add_css($path);
+  $output = "<pre><div class='mtheme-css-page'>". $css['css'] ."</div></pre>";
+
+  return $output;  
 }
 
 /**
