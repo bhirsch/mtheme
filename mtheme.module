@@ -474,24 +474,3 @@ function mtheme_selector_features_export_render($module_name, $data, $export = N
 }
 // */
 
-/**
- * Implementation of hook_features_export_options().
- */
-// TODO 
-
-/**
- * Implementation of hook_features_revert().
- */
-/*
-function mtheme_features_export_revert($module_name) {
-print("mtheme_features_export_revert here: \n");
-print_r($module_name, TRUE);
-  $mycomponents = module_invoke_all($module_name, 'selector_defaults');
-  if (!empty($$mycomponents)) {
-    foreach ($mycomponents as $mycomponent) {
-      mycomponent_delete($mycomponent);
-    }
-  }
-}
-// */
-
