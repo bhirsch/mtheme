@@ -472,5 +472,73 @@ function mtheme_selector_features_export_render($module_name, $data, $export = N
 
   return $render;
 }
-// */
 
+//-----------------------------------------------------//
+// Move these functions below into new CSS module      //
+//-----------------------------------------------------//
+
+/**
+ * Begin CSS with timestamp in comment at the top.
+ */
+function _mtheme_start_css() {
+  $time = time();
+  $date = date("F j, Y, g:i a");
+  global $base_url;
+
+  $txt = "Generated $date -- $time -- $base_url";  
+
+  $css = '';
+  $css .= "/* $txt */ \n \n";  
+  
+  return $css; 
+}
+
+/**
+ * Write CSS comment for group of selectors.
+ */
+function _mtheme_group_comment($css = NULL, $group) {
+  $txt = t($group['group_title']) .' ';
+  $line = 60 - strlen($txt);
+  for ($i = 0; $i < $line; $i++) {
+    $txt .= '=';
+  }
+
+  $css .= "\n";
+  $css .= '/**'. "\n";
+  $css .= ' * '. $txt ."\n";
+  $css .= ' */'. "\n";
+  $css .= "\n";
+
+  return $css; 
+}
+
+/**
+ * Write CSS for selector.
+ */
+function _mtheme_write_selector_css($css = NULL, $selector) {
+  // Add comment.
+  $css = _mtheme_selector_comment($css, $selector); 
+  // Add selector and properties. 
+  $css .= '  '. $selector->css_selector ."\n";
+  $css .= "  {\n";
+  $properties = explode("\n", $selector->css_properties);
+  foreach($properties as $property) {
+    $css .= "    $property"; // seems like $property hangs onto carriage return 
+  }
+  $css .= "\n  }\n";
+
+  return $css; 
+}
+
+/**
+ * Write CSS comment for selector.
+ */
+function _mtheme_selector_comment($css, $selector) {
+  $txt = '';
+  $txt = t($selector->title) .' -- ';
+  $txt .= t('unique identifier:') . $selector->name; 
+
+  $css .= "  /* $txt */ \n";
+
+  return $css; 
+}
