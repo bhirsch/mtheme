@@ -192,10 +192,11 @@ function mtheme_add_css() {
   $features = features_get_features();
   foreach ($features as $feature) {
     // Make sure the feature module is enabled and has mtheme selectors.
-    if ($feature->info['features']['mtheme_selector'] && $feature->status == 1) {
+    $mtheme_selectors = $feature->info['features']['mtheme_selector']; // @todo Devel backtrace shows an error here. Not sure what's causing the error.
+    if ($mtheme_selectors && $feature->status == 1) {
       $module_name = $feature->name;
       // Check each selector.
-      foreach ($feature->info['features']['mtheme_selector'] as $name) {
+      foreach ($mtheme_selectors as $name) {
         if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
           $path = drupal_get_path('module', $module_name);
           $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
@@ -213,6 +214,25 @@ function mtheme_add_css() {
     }  
   }
   
+}
+
+/**
+ * @param $name
+ *  array, selectors to return. return all if no name is passed.
+ * 
+ * @param $disabled
+ *  boolean, return disabled selectors? 
+ *
+ * @return $selectors
+ *  array of $selector objects
+ */
+function mtheme_get_selectors($name = NULL, $disabled = TRUE) {
+  // TODO handle $name
+  // TODO handle $disabled = FALSE
+  ctools_include('export');
+  $selectors = ctools_export_load_object('mtheme_selector'); 
+
+  return $selectors;
 }
 
 /**
