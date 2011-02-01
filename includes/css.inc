@@ -67,7 +67,10 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
 function mtheme_css_page() {
   $txt = t('The style sheet below displays the current '
     .'state of all your Module Theme CSS selectors compiled into '
-    .'a single style sheet.');
+    .'a single style sheet. NOTE: This is not "the real stylesheet". '
+    .'Disabled selectors are displayed '
+    .'here, even though Drupal does not actually load CSS from disabled '
+    .'selectors.');
   drupal_set_message($txt);
 
   $css = mtheme_generate_css(FALSE, TRUE);  
