@@ -217,7 +217,7 @@ function mtheme_add_css() {
 }
 
 /**
- * @param $name
+ * @param $names
  *  array, selectors to return. return all if no name is passed.
  * 
  * @param $disabled
@@ -226,11 +226,17 @@ function mtheme_add_css() {
  * @return $selectors
  *  array of $selector objects
  */
-function mtheme_get_selectors($name = NULL, $disabled = TRUE) {
+function mtheme_get_selectors($names = NULL, $disabled = TRUE) {
   // TODO handle $name
-  // TODO handle $disabled = FALSE
   ctools_include('export');
-  $selectors = ctools_export_load_object('mtheme_selector'); 
+  if ($name) {
+    $selectors = array();
+    foreach ($names as $name) {
+      $selectors[] = ctools_export_load_object('mtheme_selector', 'names', array($name)); 
+    }
+  } else {
+    $selectors = ctools_export_load_object('mtheme_selector'); 
+  }
 
   return $selectors;
 }
