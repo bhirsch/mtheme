@@ -26,7 +26,16 @@ class mtheme_export_ui extends ctools_export_ui {
   }
 
   function list_render(&$form_state) {
-    return theme('table', $this->list_table_header(), $this->rows, array('class' => 'mtheme-admin', 'id' => 'ctools-export-ui-list-items'));
+    /*
+    $list_header = $this->list_table_header();
+    $title = array(array('data' => 'Title', 'class' => 'ctools-export-ui-name'));
+    $list_header = array_merge($title, $list_header);
+    // */
+    
+    $list_table_header = $this->list_table_header();
+    $list_table_header[0]['data'] = t('CSS Selector');
+
+    return theme('table', $list_table_header, $this->rows, array('class' => 'mtheme-admin', 'id' => 'ctools-export-ui-list-items'));
   }
 
   function list_build_row($item, &$form_state, $operations) {
@@ -40,13 +49,25 @@ class mtheme_export_ui extends ctools_export_ui {
       $this->sorts["{$group}"] = $group;
     }
 
-    // Build row for each context item.
+    // Build row for each item.
     $this->rows["{$group}:{$name}"]['data'] = array();
     $this->rows["{$group}:{$name}"]['class'] = !empty($item->disabled) ? 'ctools-export-ui-disabled' : 'ctools-export-ui-enabled';
+
+$output = '<div subtheme-export-ui-title>/*** '. check_plain($item->title) .', '. check_plain($name) .' ***/</div>';
+$output .= '<div subtheme-export-ui-css-selector>'. check_plain($item->css_selector) .'</div>';
+//$output = check_plain($name) .' ('. check_plain($item->css_selector) .')';
+$output .= "<div class='description'>" . check_plain($item->description) . "</div>";
+
     $this->rows["{$group}:{$name}"]['data'][] = array(
-      'data' => check_plain($name) . "<div class='description'>" . check_plain($item->description) . "</div>",
+      'data' => $output,
       'class' => 'ctools-export-ui-name'
     );
+    /*
+    $this->rows["{$group}:{$name}"]['data'][] = array(
+      'data' => check_plain($item->css_selector),
+      'class' => 'ctools-export-ui-css-selector'
+    );
+    // */
     $this->rows["{$group}:{$name}"]['data'][] = array(
       'data' => check_plain($item->type),
       'class' => 'ctools-export-ui-storage'
