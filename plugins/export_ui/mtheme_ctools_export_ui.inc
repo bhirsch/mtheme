@@ -99,7 +99,7 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
         '#type' => 'item',
         '#title' => t("File "). $i,
         '#value' => $link,
-        '#description' => t("Add this file to you CSS like this: "
+        '#description' => t("Add this file to your CSS like this: "
                            ."background: url('". $title ."');"),
       );
       $i++; 

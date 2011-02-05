@@ -421,7 +421,7 @@ function mtheme_features_files($export, $module_name) {
       $add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
       $add_files[$i]->filename = $mtheme_path .'/'. $name .'.css';
       $add_files[$i]->subdir = '';
-      // TODO Check for images.
+      // Check for images.
       $images_path = $mtheme_path .'/images/'. $name;
       foreach (@file_scan_directory($images_path, '.*') as $file) {
         $i++;
@@ -430,7 +430,6 @@ function mtheme_features_files($export, $module_name) {
         $add_files[$i]->filename = $file->filename;
         $add_files[$i]->subdir = 'images/'. $name;
       }
-      // TODO Step 6. Update theme.module and try it for real.
       $i++;
     }
   }
