@@ -539,10 +539,12 @@ function _mtheme_write_selector_css($css = NULL, $selector) {
  */
 function _mtheme_selector_comment($css, $selector) {
   $txt = '';
-  $txt = t($selector->title) .' -- ';
-  $txt .= t('unique identifier:') . $selector->name; 
+//  $txt = t($selector->title) .' -- ';
+  $txt = t($selector->title);
+//  $txt .= t('unique identifier: ') . $selector->name; 
+  $txt .= t(', ') . $selector->name; 
 
-  $css .= "  /* $txt */ \n";
+  $css .= "  /*** $txt ***/ \n";
 
   return $css; 
 }
