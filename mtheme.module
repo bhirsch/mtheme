@@ -227,17 +227,16 @@ function mtheme_add_css() {
  *  array of $selector objects
  */
 function mtheme_get_selectors($names = NULL, $disabled = TRUE) {
-  // TODO handle $name
-  ctools_include('export');
-  if ($name) {
-    $selectors = array();
+  $selectors = array();
+  if ($names) {
     foreach ($names as $name) {
-      $selectors[] = ctools_export_load_object('mtheme_selector', 'names', array($name)); 
-    }
+      $selectors[] = mtheme_selector_load($name);
+    } 
   } else {
+    ctools_include('export');
     $selectors = ctools_export_load_object('mtheme_selector'); 
   }
-
+  
   return $selectors;
 }
 
