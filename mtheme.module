@@ -102,50 +102,6 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
-/**
- * Implementation of hook_modules_enabled().
- * 
- * If a module implementing default_mtheme_selector is 
- * enabled, re-write mtheme.css.
- */
-/*
-// @todo Oops. This function is only available in D7.
-function mtheme_modules_enabled($modules) {
-  foreach($modules as $module) {
-    $path = drupal_get_path('module', $module);
-    $filename = $path ."/{$module}.info";
-    $info = drupal_parse_info_file($filename);
-    if ($info['features']['mtheme_selector']) {
-dsm("testing, mtheme_modules_enabled: {$module}");
-      mtheme_css(); // @todo add error handling here.
-      clear_cache_all();
-    }
-  }
-}
-// */
-
-/**
- * Implementation of hook_modules_disabled().
- * 
- * If a module implementing default_mtheme_selector is 
- * disabled, re-write mtheme.css.
- */
-/*
-// @todo Oops. This function is only available in D7.
-function mtheme_modules_disabled($modules) {
-  foreach($modules as $module) {
-    $path = drupal_get_path('module', $module);
-    $filename = $path ."/{$module}.info";
-    $info = drupal_parse_info_file($filename);
-    if ($info['features']['mtheme_selector']) {
-dsm("testing, mtheme_modules_disabled: {$module}");
-      mtheme_css(); // @todo add error handling here.
-      clear_cache_all();
-    }
-  }
-}
-// */
-
 //----------------------------------------------//
 // mtheme                                       //
 //----------------------------------------------//
