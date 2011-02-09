@@ -75,6 +75,13 @@ function theme_mtheme_css_page($css) {
 
 /**
  * Implementation of hook_form_alter().
+ * 
+ * @todo subtheme module stores all these submit, validate,
+ *  delete functions in subtheme_ctools_export_ui.inc. I think that's
+ *  cleaner because it keeps all the functions related to the same form
+ *  in one place. Move this stuff from css.inc to mtheme_ctools_export_ui.inc.
+ *  Then, what's left in css.inc should probably be turned into it's own
+ *  dedicated css module, for mtheme, subtheme and other modules.
  */
 function mtheme_form_alter(&$form, &$form_state, $form_id) {
   // Modify forms for adding and editing mtheme objects
@@ -82,7 +89,7 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
     // admin/build/mtheme/add
     if (arg(3) == 'add' ||
       // admin/build/mtheme/list/selector_name/edit
-      (arg(3) == 'list' && arg(5) == 'edit')) {
+      (arg(3) == 'list' && ( arg(5) == 'edit' || arg(5) == 'clone' ) )) {
       // Call mtheme functions after new selectors are added or saved.
       // $form['#validate'][] = 'mtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
       ctools_include('css', 'mtheme'); // include includes/css.inc
@@ -214,6 +221,68 @@ function mtheme_add_css() {
     }  
   }
   
+}
+
+/**
+ * Find the path to the mtheme's images directory.
+ * 
+ * If no status is passed, assume we're finding out the
+ * current images file location. (If the mtheme is in code only, 
+ * the images directory lives in a features module. Otherwise, the 
+ * images directory lives in files/mtheme/images/mtheme_name.)
+ * If a status is passed, return the requested path (for an images directory
+ * when in code only, or an images directory in the files directory).
+ * 
+ * @param $selector
+ *  object, mtheme_selector object. 
+ * 
+ * @param $status
+ *  string, 'in code only' OR 'files'
+ * 
+ * @return
+ *  string, path/to/images/directory.
+ */
+function mtheme_images_path($selector, $status = FALSE) {
+  $name = $selector->name;
+  if ($selector->in_code_only || $status == 'in code only') {
+    $feature = mtheme_get_feature($name); 
+    $module_name = $feature->name;
+    $module_path = drupal_get_path('module', $module_name);
+    $path = $module_path ."/images/$name";
+  } else {
+    $path = file_directory_path() ."/mtheme/images/$name";  
+  }
+  return $path;
+  // */
+}
+
+/**
+ * @param $name
+ *  string, mtheme_selector name
+ * 
+ * @return $feature
+ *  object, results of features_get_feature($name) for the 
+ *  feature module that stores the selector requested.
+ * 
+ * @todo cache info about which mtheme is stored in which
+ *     module so we don't have to load all these features 
+ *     modules here?
+ */
+function mtheme_get_feature($name) {
+  $features = features_get_features();
+  $feature_with_mtheme = '';
+
+  foreach ($features as $feature) {
+    // Check for subthemes.
+    if ($feature->info['features']['mtheme_selector']) {
+      foreach ($feature->info['features']['mtheme_selector'] as $mtheme_name) {
+        if ($mtheme_name == $name) {
+          $feature_with_subtheme = $feature;  
+        }
+      }
+    }
+  }
+  return $feature_with_subtheme;
 }
 
 /**

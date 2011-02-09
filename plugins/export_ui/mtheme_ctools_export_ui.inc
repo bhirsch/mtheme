@@ -71,7 +71,7 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
   );
   // Include files field group for uploading background images
   // Include enctype, otherwise uploads won't work!
-  if (arg(5) == 'edit') { // Only add files after first save, we need a name.
+  if (arg(5) == 'edit' || arg(5) == 'clone') { // Only add files after first save, we need a name.
     $form['#attributes'] = array('enctype' => 'multipart/form-data');
     $form['files'] = array(
       '#type' => 'fieldset',
@@ -86,9 +86,9 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#element_validate' => array('mtheme_save_files'),
     );
     // Check for available files
-
     $name = arg(4);
-    $path = file_directory_path() .'/mtheme/images/'. $name;  
+    //$path = file_directory_path() .'/mtheme/images/'. $name;  
+    $path = mtheme_images_path($selector); //Path to files dir or features module w files.
     $i = 0; // Use counter in case of conflicting $file->basename values
     foreach (@file_scan_directory($path, '.*') as $file) {
       $title = "images/$name/$file->basename";
