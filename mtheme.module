@@ -200,7 +200,7 @@ function mtheme_add_css() {
  */
 function mtheme_images_path($selector, $status = FALSE) {
   $name = $selector->name;
-  if ($selector->in_code_only || $status == 'in code only') {
+  if (!$status && $selector->in_code_only || $status == 'in code only') {
     $feature = mtheme_get_feature($name); 
     $module_name = $feature->name;
     $module_path = drupal_get_path('module', $module_name);
@@ -239,6 +239,34 @@ function mtheme_get_feature($name) {
     }
   }
   return $feature_with_subtheme;
+}
+
+/**
+ * When an mtheme_selector stored in code is modified through Drupal's GUI
+ * copy all the files
+ * from the mtheme's features module into the files directory,
+ * otherwise relative links to background images will break when 
+ * the new CSS file is written in the files/mtheme
+ * directory.
+ * 
+ * @param $selector
+ *  object, mtheme_selector object.
+ */
+function mtheme_copy_files($selector) {
+  $name = $selector->name;
+  // Copy images.
+  $images_path = mtheme_images_path($selector, 'in code only'); 
+  $new_images_path = mtheme_images_path($selector, 'files');
+  file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
+  foreach (@file_scan_directory($images_path, '.*') as $file) {
+    $file_path = $new_images_path ."/". $file->basename;
+    file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+  }
+  // return ? // @todo Add error handling. Notify user if unsuccessful? 
+              //       These file functions do a pretty good job notifying 
+              //       administrators about errors,
+              //       still it seems like there should be something
+              //       subtheme-specific here. 
 }
 
 /**

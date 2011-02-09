@@ -26,8 +26,12 @@ function mtheme_css($selector = NULL) {
 }
 
 /**
- * When a selector is saved (added or edited)
- * re-write css to include new selector. 
+ * When a selector is saved (added, edited or cloned)
+ * re-write css for that selector. 
+ * 
+ * When a selector changes states from in_code_only to 
+ * stored in the database + files directory, copy image files
+ * from features module into files directory.
  * 
  * @todo There's probably a more efficient way to do this than
  * re-writing the CSS after each new selector is saved, but 
@@ -39,7 +43,13 @@ function mtheme_css($selector = NULL) {
  */
 function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   $selector = $form_state['item'];
-  mtheme_css($selector); // @todo add error handling here.
+  $in_code_only = $form_state['values']['in_code_only'];
+
+  mtheme_css($selector); // @todo add error handling here?
+  if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
+    mtheme_copy_files($selector);
+  }
+
 }
 
 /**

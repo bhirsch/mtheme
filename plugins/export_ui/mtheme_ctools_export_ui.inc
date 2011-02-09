@@ -132,5 +132,10 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#default_value' => $selector->weight,
     '#required' => FALSE,
   );
-
+  // Keep track of whether the subtheme was in code only when form 
+  // was built.
+  $form['in_code_only'] = array(
+    '#type' => 'hidden',
+    '#value' => $selector->in_code_only,
+  );
 }
