@@ -1,40 +1,44 @@
-Module Theme
---------------
+// $Id$
 
-[TODO write readme documentation]
+Module Theme (version 1.x)
+----------------------------
+The Module Theme module enables you to:
+- Theme your website through Drupal's web interface
+- Export theme elements with the Features module
+- Surface the different theme elements that ship with 
+  various modules and themes in one central location 
+- Enable modules to ship with a selection of different style 
+  sheets, to be easily enabled/disabled for different use-cases by the 
+  site administrator or end-user
+- Provide an easy interface for enabling, disabling, and copying 
+  theme elements provided by other modules and themes
+  (Note: It is possible to use the Module Theme module to override
+  theming provided by other modules or themes, but this is a hack.
+  Use the Subtheme module.)
+
+Installation 
+---------------
+1. Place the entire mtheme folder into your modules directory.
+   Go to Administer -> Site building -> Modules and enable the Module Theme
+   module. 
+2. To "mtheme-enable" any theme on your site, copy and paste the following 
+   snippet of code into the bottom of your theme(s) template.php file
+   (below the last function in the file): 
+
+   if (module_exists('mtheme')) {
+     mtheme_add_css();  
+   }
+
+Use 
+----------
+If you are installing the Module Theme module so you can use
 
 
-This only works with the following line included in template.php
-New version:
-if (module_exists('mtheme')) {
-  mtheme_add_css();  
-}
-
-Legacy: 
-$mtheme_css = file_directory_path() .'/mtheme/mtheme.css';
-if (file_exists($mtheme_css)) {
-  drupal_add_css($mtheme_css, 'theme', 'all', TRUE);
-}
-
-
-Comments like this: 
-------------------
-/**
- * Group ======================================================
- */
-
-/* selector title */
-#selector  
-{
-  property: value; /* comment from text area */
-  property2: value; /* comment from text area */ 
-}
-
-
-For Module Developers
-----------------------
-- write CSS with GUI
-- export as feature module: mymtheme
-- include mymtheme in your mymodule/ or mymodule/modules
-- include the CSS by declaring it in the .info file (or hook_init() if you're a rebel)
+For Site Builders and Module Developers
+-----------------------------------------
 - to enable/disable mymtheme when your module is enabled/disabled, use hook_enable and hook_disable
+  
+
+Maintainer
+-------------
+Bryan Hirsch, bryan AT bryanhirsch.com
