@@ -18,26 +18,58 @@ The Module Theme module enables you to:
 
 Installation 
 ---------------
-1. Place the entire mtheme folder into your modules directory.
-   Go to Administer -> Site building -> Modules and enable the Module Theme
-   module. 
-2. To "mtheme-enable" any theme on your site, copy and paste the following 
-   snippet of code into the bottom of your theme(s) template.php file
-   (below the last function in the file): 
+Place the entire mtheme folder into your modules directory.
+Go to Administer -> Site building -> Modules and enable the Module Theme
+module. 
 
-   if (module_exists('mtheme')) {
-     mtheme_add_css();  
-   }
+To "mtheme-enable" any theme on your site, copy and paste the following 
+snippet of code into the bottom of your theme(s) template.php file
+(below the last function in the file): 
+
+if (module_exists('mtheme')) {
+  mtheme_add_css();  
+}
 
 Use 
 ----------
-If you are installing the Module Theme module so you can use
+If you are installing the Module Theme because it is a dependency
+of another module in your site, you're done. No additional set-up 
+or configuration required. 
 
+If you are a site builder or module developer interested in using
+Module Theme to theme your modules (or just add a little CSS here 
+or there) read on.
 
 For Site Builders and Module Developers
 -----------------------------------------
-- to enable/disable mymtheme when your module is enabled/disabled, use hook_enable and hook_disable
-  
+Go to Administer -> Site building -> Module Theme.
+
+Here you will see a list of all the different CSS selectors included
+in your site by modules and themes implementing their theming with 
+Module Theme. 
+
+Click the CSS tab to see all these selectors compiled into one single style sheet. 
+
+Click the Add tab to add your own CSS.
+
+To export CSS created with Module Theme go to
+Administer -> Site building -> Features -> Create Feature
+
+Under Edit Components select Module Theme, then select the components (CSS selectors)
+you want to export. When you're done click Download feature. Now your CSS is 
+included in the module you just downloaded.
+
+There are a few different ways to include theming in your custom modules
+after exporting as described above:
+A. If your custom module is a single feature module, just include the 
+   CSS as described above and your done. When the module is enabled,
+   all your CSS gets enabled with it.
+B. If your custom module is not a feature module, the easiest thing to do 
+   is export your CSS as a feature module and include that feature module 
+   with your module. (By convention, many modules include a theme directory 
+   and put all their theming in there. Consider creating a directory called
+   mtheme and storing your theme feature(s) in there.) Then include features 
+   in your mtheme directory as dependencies in your .info file.
 
 Maintainer
 -------------

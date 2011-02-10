@@ -114,7 +114,8 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
   $form['grp'] = array(
     '#type' => 'textfield',
     '#title' => t('CSS Selector Group'),
-    '#description' => t("Group selectors together. (Use your module name if you're not sure what to put here.)"),
+    '#description' => t("Group selectors together. (Use your module name "
+                       ."or site name if you're not sure what to put here.)"),
     '#default_value' => $selector->grp,
     '#required' => TRUE,
   );
