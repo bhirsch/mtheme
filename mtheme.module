@@ -1,7 +1,6 @@
 <?php
 /**
- * @file
- *  
+ * @file mtheme.module
  */
  
 //--------------------------------//
@@ -263,10 +262,10 @@ function mtheme_copy_files($selector) {
     file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
   }
   // return ? // @todo Add error handling. Notify user if unsuccessful? 
-              //       These file functions do a pretty good job notifying 
-              //       administrators about errors,
-              //       still it seems like there should be something
-              //       subtheme-specific here. 
+              // These file functions do a pretty good job notifying 
+              // administrators about errors,
+              // still it seems like there should be something
+              // subtheme-specific here. 
 }
 
 /**
@@ -425,13 +424,6 @@ function mtheme_selector_save(&$myobj) {
 //-------------------------------------------------/
 // Features hooks                                  /
 //-------------------------------------------------/
-/**
- * Implementation of hook_features_api().
- */
-/*
-function mtheme_features_api() {
-}
-// */
 
 /**
  * Implementation of hook_features_export().
