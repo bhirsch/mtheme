@@ -434,9 +434,13 @@ function mtheme_selector_save(&$myobj) {
  */
 function mtheme_selector_features_export($data, &$export, $module_name) {
   // Add dependencies
-  $export['dependencies']['ctools'] = "ctools";
-  $export['dependencies']['features'] = "features";
-  $export['dependencies']['mtheme'] = "mtheme";
+  // @todo ctools and features dependencies aren't getting added
+  //  to info file. I'm not sure it matters, because these are 
+  //  dependencies of mtheme anyway. Just seems cleaner to include
+  //  them.
+  //$export['dependencies'][] = "ctools";
+  //$export['dependencies'][] = "features";
+  $export['dependencies'][] = "mtheme";
   // Add ctools default hook.
   $export['features']['ctools']["mtheme:default_mtheme_selector:1"] = "mtheme:default_mtheme_selector:1";
   // Add mtheme_selector objects
