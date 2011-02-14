@@ -56,11 +56,12 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#required' => FALSE,
   );
   $form['css_selector'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('CSS Selector'),
     '#description' => t('CSS selector. E.g. div or  div#example .demo '),
     '#default_value' => $selector->css_selector,
     '#required' => true,
+    '#rows' => 1,
   );
   $form['css_properties'] = array(
     '#type' => 'textarea',
