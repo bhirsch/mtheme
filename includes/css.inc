@@ -103,7 +103,9 @@ function mtheme_save_files($form, &$form_state) {
   if ($file = file_save_upload($parent)) {
     // Get file extension.
     $parts = pathinfo($file->filename);
-    //$extension = $parts['extension'];
+    // Check for file directory. Create if needed.
+    $directory = file_directory_path() .'/mtheme';
+    file_check_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for images file directory. Create if needed.
     $directory = file_directory_path() .'/mtheme/images/';
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
@@ -197,9 +199,15 @@ function mtheme_write_css($css) {
   $file_contents = $css['css'];
   $name = $css['name'];
   // Set the location of the mtheme.css file
-  $file_path = file_directory_path() .'/mtheme/'. $name .'.css';
+  $mtheme_path = file_directory_path() .'/mtheme';
+  $file_path = $mtheme_path ."/$name.css";
 
   // If the directory doesn't exist, create it
+  $dir = file_check_directory($mtheme_path, FILE_CREATE_DIRECTORY);
+  if (!$dir) {
+    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
+    drupal_set_message($txt, 'error');
+  }
   $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
   if (!$dir) {
     $txt = t('The function file_check_directory() failed. Please notify your system administrator.');

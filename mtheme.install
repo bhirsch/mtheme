@@ -92,8 +92,7 @@ function mtheme_schema() {
       // */
       // css selector 
       'css_selector' => array(
-        'type' => 'varchar',  
-        'length' => 255,      
+        'type' => 'text',  
         'not null' => TRUE, 
         'default' => '',
         'description' => t('CSS selector. E.g. div or  div#example .demo '),
@@ -128,9 +127,18 @@ function mtheme_schema() {
 /**
  * Implementation of hook_update_N.
  * 
- * Add permission field.
+ * Change css_selector field from varchar to text.
  */
-/*
 function mtheme_update_6001() {
+  $ret = array();
+  $table = 'mtheme_selector';
+  $field = 'css_selector';
+  $field_new = 'css_selector';
+  $spec = array(
+    'type' => 'text',
+    'not null' => TRUE,
+    'default' => '',
+    'description' => t('CSS selector. E.g. div or  div#example .demo '),
+  );
+  db_change_field(&$ret, $table, $field, $field_new, $spec, $new_keys = array());
 }
-// */
