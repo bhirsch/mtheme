@@ -575,7 +575,10 @@ function _mtheme_write_selector_css($css = NULL, $selector) {
   // Add comment.
   $css = _mtheme_selector_comment($css, $selector); 
   // Add selector and properties. 
-  $css .= '  '. $selector->css_selector ."\n";
+  $selectors = explode("\n", $selector->css_selector); // Incase there are multiple selectors, separated by commas and line breaks
+  foreach ($selectors as $s) {
+    $css .= '  '. $s ."\n";
+  }
   $css .= "  {\n";
   $properties = explode("\n", $selector->css_properties);
   foreach($properties as $property) {
