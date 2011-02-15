@@ -584,7 +584,7 @@ function _mtheme_write_selector_css($css = NULL, $selector) {
   foreach($properties as $property) {
     $css .= "    $property"; // seems like $property hangs onto carriage return 
   }
-  $css .= "\n  }\n";
+  $css .= "\n  }\n\n";
 
   return $css; 
 }
