@@ -554,7 +554,7 @@ function _mtheme_start_css() {
  */
 function _mtheme_group_comment($css = NULL, $group) {
   $txt = t($group['group_title']) .' ';
-  $line = 60 - strlen($txt);
+  $line = 80 - strlen($txt);
   for ($i = 0; $i < $line; $i++) {
     $txt .= '=';
   }
