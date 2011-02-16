@@ -451,7 +451,9 @@ function mtheme_selector_features_export($data, &$export, $module_name) {
     // @todo for some reason features components need associative arrays
     // to come out right in the .info file. Stylesheet components 
     // seem to need numerical arrays.  
-    $export['stylesheets']['all'][] = "mtheme/$component/$component.css"; 
+    //
+    // @todo Stylesheets aren't actually loaded from here. Leave this out of .info files. Revisit this later.
+    //$export['stylesheets']['all'][] = "mtheme/$component/$component.css"; 
   }
   return array();
 }
