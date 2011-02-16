@@ -147,8 +147,8 @@ function mtheme_add_css() {
       $in_database[] = $name; 
     }
   }
-     
-  // Load style sheets in code (features modules).
+
+// Load style sheets in code (features modules).
   $features = features_get_features();
   foreach ($features as $feature) {
     // Make sure the feature module is enabled and has mtheme selectors.
