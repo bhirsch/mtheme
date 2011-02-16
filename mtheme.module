@@ -159,7 +159,7 @@ function mtheme_add_css() {
       foreach ($mtheme_selectors as $name) {
         if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
           $path = drupal_get_path('module', $module_name);
-          $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
+          $stylesheet = $path ."/mtheme/$name/$name.css";     // @todo maybe we don't 
           drupal_add_css($stylesheet, 'theme', 'all', TRUE);  //  need stylesheets in 
         }                                                     //  .info files anymore?
       } 
@@ -451,7 +451,7 @@ function mtheme_selector_features_export($data, &$export, $module_name) {
     // @todo for some reason features components need associative arrays
     // to come out right in the .info file. Stylesheet components 
     // seem to need numerical arrays.  
-    $export['stylesheets']['all'][] = $module_name .'.'. $component .'.css'; 
+    $export['stylesheets']['all'][] = "mtheme/$component/$component.css"; 
   }
   return array();
 }

@@ -224,3 +224,39 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
     }
   }
 }
+
+/**
+ * Save image files.
+ * 
+ * Images should get saved like this:
+ * files/$selector_name/images/imageX.jpg
+ * 
+ * Callback for #element_validate on 
+ * #files element of admin/build/mtheme/add and /edit form.
+ */
+function mtheme_save_files($form, &$form_state) {
+  // Get parent (the form element that called this function)
+  $parent = $form['#parents'][0];
+  // Check for a new uploaded file, and use that if available.
+  if ($file = file_save_upload($parent)) {
+    $name = $form_state['item']->name;
+    // Get file extension.
+    $parts = pathinfo($file->filename);
+    // Check for file directory. Create if needed.
+    $directory = file_directory_path() .'/mtheme';
+    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    // Check for files/myselector directory. Create if needed.
+    $directory = file_directory_path() .'/mtheme/'. $name;
+    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    // Check for files/myselector/images file directory. Create if needed.
+    $directory = $directory ."/images";
+    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    //Name the file. 
+    $file_path = $directory ."/". $file->filename;
+    // The image was saved using file_save_upload() and was added to the
+    // files table as a temporary file. We'll make a copy and let the garbage
+    // collector delete the original upload.
+    file_copy($file, $file_path, FILE_EXISTS_REPLACE);
+  }
+  return $form;
+}
