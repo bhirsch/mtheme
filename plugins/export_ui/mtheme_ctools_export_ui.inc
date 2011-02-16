@@ -141,3 +141,53 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#value' => $selector->in_code_only,
   );
 }
+
+/**
+ * When a selector is saved (added, edited or cloned)
+ * re-write css for that selector. 
+ * 
+ * When a selector changes states from in_code_only to 
+ * stored in the database + files directory, copy image files
+ * from features module into files directory.
+ * 
+ * @todo There's probably a more efficient way to do this than
+ * re-writing the CSS after each new selector is saved, but 
+ * for now, doing it this way keeps it simple. 
+ * 
+ * There is no extravagant naming convention magic here.
+ * This function is just called mymodule_ctoolform_submit, that is
+ * mtheme _ ctools_export_ui_edit_item_form _ submit.
+ */
+function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
+  ctools_include('css', 'mtheme'); // include includes/css.inc
+
+  $selector = $form_state['item'];
+  $in_code_only = $form_state['values']['in_code_only'];
+  $clone = (arg(5) == 'clone') ? TRUE : FALSE; // Existing selector is being cloned.
+
+dsm($selector);
+  mtheme_css($selector); // @todo add error handling here?
+  if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
+    mtheme_copy_files($selector);
+  } else if ($clone) {
+     
+  }
+
+}
+
+/**
+ * When a selector is deleted or reverted,
+ * delete the files/mtheme/myselector.css
+ * and any related files.
+ */
+function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state) {
+  $name = $form_state['item']->name;
+  // delete style sheet
+  $path = file_directory_path() ."/mtheme/$name.css";
+  file_delete($path);
+  // delete files 
+  $path = file_directory_path() .'/mtheme/images/'. $name;  
+  foreach (@file_scan_directory($path, '.*') as $file) {
+    file_delete($file->filename);
+  }
+}

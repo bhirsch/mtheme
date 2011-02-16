@@ -91,12 +91,10 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
       (arg(3) == 'list' && ( arg(5) == 'edit' || arg(5) == 'clone' ) )) {
       // Call mtheme functions after new selectors are added or saved.
       // $form['#validate'][] = 'mtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
-      ctools_include('css', 'mtheme'); // include includes/css.inc
       $form['#submit'][] = 'mtheme_ctools_export_ui_edit_item_form_submit';
     }
   // Modify forms for deleting and reverting mtheme objects
   } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'mtheme') {
-    ctools_include('css', 'mtheme'); // include includes/css.inc
     $form['#submit'][] = 'mtheme_ctools_export_ui_delete_confirm_form_submit';
   }
 }
@@ -244,20 +242,27 @@ function mtheme_get_feature($name) {
 
 /**
  * When an mtheme_selector stored in code is modified through Drupal's GUI
- * copy all the files
- * from the mtheme's features module into the files directory,
+ * copy all the files from the mtheme's features module into the files directory,
  * otherwise relative links to background images will break when 
- * the new CSS file is written in the files/mtheme
- * directory.
+ * the new CSS file is written in the files/mtheme directory. Files should also
+ * get copied when an mtheme_selector is cloned.
  * 
  * @param $selector
  *  object, mtheme_selector object.
+ *
+ * @param $paths
+ *  array('images_path' => 'path/to/images', 'new_images_path' => 'copy/files/to/here')
  */
-function mtheme_copy_files($selector) {
+function mtheme_copy_files($selector, $paths = FALSE) {
   $name = $selector->name;
   // Copy images.
-  $images_path = mtheme_images_path($selector, 'in code only'); 
-  $new_images_path = mtheme_images_path($selector, 'files');
+  if (!$paths) { // Assume images are being copied from a module to files directory.
+    $images_path = mtheme_images_path($selector, 'in code only'); 
+    $new_images_path = mtheme_images_path($selector, 'files');
+  } else {
+    $images_path = $paths['images_path'];
+    $new_images_path = $paths['new_images_path'];
+  } 
   file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
   foreach (@file_scan_directory($images_path, '.*') as $file) {
     $file_path = $new_images_path ."/". $file->basename;
@@ -267,7 +272,7 @@ function mtheme_copy_files($selector) {
               // These file functions do a pretty good job notifying 
               // administrators about errors,
               // still it seems like there should be something
-              // subtheme-specific here. 
+              // mtheme-specific here. 
 }
 
 /**
@@ -468,21 +473,26 @@ function mtheme_features_files($export, $module_name) {
   if ($mtheme_selectors = $export['features']['mtheme_selector']) {
     // Get css files for each component. 
     $i = 0;
-    $mtheme_path = file_directory_path() .'/mtheme';
     foreach ($mtheme_selectors as $name) {
+      $mtheme_path = file_directory_path() .'/mtheme/'. $name;
       // Get selector's CSS file
-      $add_files[$i]->name = $module_name .'.'. $name;
-      $add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
+      //$add_files[$i]->name = $module_name .'.'. $name;
+      $add_files[$i]->name = $name;
+      //$add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
+      $add_files[$i]->basename = $name .'.css'; 
+      //$add_files[$i]->filename = $mtheme_path .'/'. $name .'.css';
       $add_files[$i]->filename = $mtheme_path .'/'. $name .'.css';
-      $add_files[$i]->subdir = '';
+      //$add_files[$i]->subdir = '';
+      $add_files[$i]->subdir = 'mtheme/'. $name;
       // Check for images.
-      $images_path = $mtheme_path .'/images/'. $name;
+      $selector = mtheme_selector_load($name);
+      $images_path = mtheme_images_path($selector);
       foreach (@file_scan_directory($images_path, '.*') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;
         $add_files[$i]->basename = $file->basename;
         $add_files[$i]->filename = $file->filename;
-        $add_files[$i]->subdir = 'images/'. $name;
+        $add_files[$i]->subdir = 'mtheme/'. $name .'/images';
       }
       $i++;
     }
