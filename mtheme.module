@@ -198,12 +198,14 @@ function mtheme_add_css() {
  *  string, path/to/images/directory.
  */
 function mtheme_images_path($selector, $status = FALSE) {
-  $name = $selector->name;
+  $clone = (arg(5) == 'clone') ? TRUE : FALSE; // Existing selector is being cloned.
+  $name = ($clone) ? arg(4) : $selector->name;
+
   if (!$status && $selector->in_code_only || $status == 'in code only') {
     $feature = mtheme_get_feature($name); 
     $module_name = $feature->name;
     $module_path = drupal_get_path('module', $module_name);
-    $path = $module_path ."/images/$name";
+    $path = $module_path ."/mtheme/$name/images";
   } else {
     $path = file_directory_path() ."/mtheme/$name/images";  
   }
