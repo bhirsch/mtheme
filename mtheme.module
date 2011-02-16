@@ -196,8 +196,7 @@ function mtheme_add_css() {
  *  string, path/to/images/directory.
  */
 function mtheme_images_path($selector, $status = FALSE) {
-  $clone = (arg(5) == 'clone') ? TRUE : FALSE; // Existing selector is being cloned.
-  $name = ($clone) ? arg(4) : $selector->name;
+  $name = $selector->name;
 
   if (!$status && $selector->in_code_only || $status == 'in code only') {
     $feature = mtheme_get_feature($name); 
@@ -251,18 +250,13 @@ function mtheme_get_feature($name) {
  *  object, mtheme_selector object.
  *
  * @param $paths
- *  array('images_path' => 'path/to/images', 'new_images_path' => 'copy/files/to/here')
+ *  array('from' => 'path/to/images', 'to' => 'copy/files/to/here')
  */
-function mtheme_copy_files($selector, $paths = FALSE) {
+function mtheme_copy_files($selector, $paths) {
   $name = $selector->name;
   // Copy images.
-  if (!$paths) { // Assume images are being copied from a module to files directory.
-    $images_path = mtheme_images_path($selector, 'in code only'); 
-    $new_images_path = mtheme_images_path($selector, 'files');
-  } else {
-    $images_path = $paths['images_path'];
-    $new_images_path = $paths['new_images_path'];
-  } 
+  $images_path = $paths['from'];
+  $new_images_path = $paths['to'];
   file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
   foreach (@file_scan_directory($images_path, '.*') as $file) {
     $file_path = $new_images_path ."/". $file->basename;

@@ -34,7 +34,12 @@ $plugin = array(
 * Define the preset add/edit form.
 */
 function mtheme_ctools_export_ui_form(&$form, &$form_state) {
-  $selector = $form_state['item'];
+  if (arg(5) == 'edit') {
+    $selector = $form_state['item'];
+  } else if (arg(5) == 'clone') {
+    $name = arg(4);
+    $selector = mtheme_selector_load($name);
+  }
 
   // mtheme's configuration interface.
   /* Ctools includes this field automatically on its own.
@@ -87,8 +92,6 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#element_validate' => array('mtheme_save_files'),
     );
     // Check for available files
-    $name = arg(4);
-    //$path = file_directory_path() .'/mtheme/images/'. $name;  
     $path = mtheme_images_path($selector); //Path to files dir or features module w files.
     $i = 0; // Use counter in case of conflicting $file->basename values
     foreach (@file_scan_directory($path, '.*') as $file) {
@@ -165,14 +168,22 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   $in_code_only = $form_state['values']['in_code_only'];
   $clone = (arg(5) == 'clone') ? TRUE : FALSE; // Existing selector is being cloned.
 
-dsm($selector);
+  // (Re-)write css.
   mtheme_css($selector); // @todo add error handling here?
-  if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
-    mtheme_copy_files($selector);
-  } else if ($clone) {
-     
+  // Copy files.
+  if ($in_code_only || $clone) {
+    $paths = array();
+    if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
+      $paths['from'] = mtheme_images_path($selector, 'in code only');
+      $paths['to'] = mtheme_images_path($selector, 'files');
+    } else if ($clone) {
+      $name = arg(4);
+      $original_selector = mtheme_selector_load($name);
+      $paths['from'] = mtheme_images_path($original_selector);
+      $paths['to'] = mtheme_images_path($selector, 'files');
+    }
+    mtheme_copy_files($selector, $paths);
   }
-
 }
 
 /**
@@ -182,12 +193,34 @@ dsm($selector);
  */
 function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state) {
   $name = $form_state['item']->name;
+  $selector = mtheme_selector_load($name);
   // delete style sheet
-  $path = file_directory_path() ."/mtheme/$name.css";
+  $path = file_directory_path() ."/mtheme/$name/$name.css";
   file_delete($path);
-  // delete files 
-  $path = file_directory_path() .'/mtheme/images/'. $name;  
+  // delete image files 
+  $path = mtheme_images_path($selector);  
   foreach (@file_scan_directory($path, '.*') as $file) {
     file_delete($file->filename);
+  }
+  // remove directories
+  $path = file_directory_path() ."/mtheme/$name/images";
+  if (file_check_directory($path)) {
+    $result = rmdir($path);
+    if ($result) {
+      $txt = $path . t(' deleted.');  
+      drupal_set_message($txt);
+    } else {
+      $txt = $path . t(' could not be deleted.'); 
+    }
+  }
+  $path = file_directory_path() ."/mtheme/$name";
+  if (file_check_directory($path)) {
+    $result = rmdir($path);
+    if ($result) {
+      $txt = $path . t(' deleted.');  
+      drupal_set_message($txt);
+    } else {
+      $txt = $path . t(' could not be deleted.'); 
+    }
   }
 }
