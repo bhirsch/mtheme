@@ -92,7 +92,7 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     $path = mtheme_images_path($selector); //Path to files dir or features module w files.
     $i = 0; // Use counter in case of conflicting $file->basename values
     foreach (@file_scan_directory($path, '.*') as $file) {
-      $title = "images/$name/$file->basename";
+      $title = "images/$file->basename";
       $link = l($title, $file->filename);
       // Add form items
       $item = $file->basename .'-'. $i;

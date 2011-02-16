@@ -93,6 +93,9 @@ function mtheme_css_page() {
 /**
  * Save image files.
  * 
+ * Images should get saved like this:
+ * files/$selector_name/images/imageX.jpg
+ * 
  * Callback for #element_validate on 
  * #files element of admin/build/mtheme/add and /edit form.
  */
@@ -101,16 +104,17 @@ function mtheme_save_files($form, &$form_state) {
   $parent = $form['#parents'][0];
   // Check for a new uploaded file, and use that if available.
   if ($file = file_save_upload($parent)) {
+    $name = $form_state['item']->name;
     // Get file extension.
     $parts = pathinfo($file->filename);
     // Check for file directory. Create if needed.
     $directory = file_directory_path() .'/mtheme';
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
-    // Check for images file directory. Create if needed.
-    $directory = file_directory_path() .'/mtheme/images/';
+    // Check for files/myselector directory. Create if needed.
+    $directory = file_directory_path() .'/mtheme/'. $name;
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
-    // Check for images/myselector file directory. Create if needed.
-    $directory = $directory ."/". $form_state['item']->name;
+    // Check for files/myselector/images file directory. Create if needed.
+    $directory = $directory ."/images";
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
     //Name the file. 
     $file_path = $directory ."/". $file->filename;
@@ -189,8 +193,8 @@ function mtheme_compose_css($a) {
 }
 
 /**
- * Write mtheme.css and store it 
- * in files/mtheme/name.css.
+ * Write CSS and store it 
+ * in files/mtheme/name/name.css.
  * 
  * @param $css
  *  Array. $css = array('name' => $name, 'css' => $css);
@@ -200,7 +204,7 @@ function mtheme_write_css($css) {
   $name = $css['name'];
   // Set the location of the mtheme.css file
   $mtheme_path = file_directory_path() .'/mtheme';
-  $file_path = $mtheme_path ."/$name.css";
+  $file_path = $mtheme_path ."/$name/$name.css";
 
   // If the directory doesn't exist, create it
   $dir = file_check_directory($mtheme_path, FILE_CREATE_DIRECTORY);

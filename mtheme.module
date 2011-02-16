@@ -171,7 +171,7 @@ function mtheme_add_css() {
   // Load style sheets from files directory (in CSS in database)
   foreach ($in_database as $name) {
     if (!in_array($name, $disabled)) {
-      $stylesheet = file_directory_path() ."/mtheme/$name.css";
+      $stylesheet = file_directory_path() ."/mtheme/$name/$name.css";
       drupal_add_css($stylesheet, 'theme', 'all', TRUE);
     }  
   }
@@ -205,7 +205,7 @@ function mtheme_images_path($selector, $status = FALSE) {
     $module_path = drupal_get_path('module', $module_name);
     $path = $module_path ."/images/$name";
   } else {
-    $path = file_directory_path() ."/mtheme/images/$name";  
+    $path = file_directory_path() ."/mtheme/$name/images";  
   }
   return $path;
   // */
