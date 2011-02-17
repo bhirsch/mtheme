@@ -170,7 +170,8 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
 
   // (Re-)write css.
   mtheme_css($selector); // @todo add error handling here?
-  // Copy files.
+
+  // Copy files into selector's directory.
   if ($in_code_only || $clone) {
     $paths = array();
     if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
@@ -184,6 +185,17 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
     }
     mtheme_copy_files($selector, $paths);
   }
+
+  // Rebuild mtheme cache.
+  // Recompile and rewrite CSS.
+  $compile = TRUE;
+  mtheme_css($selector, $compile);
+  // Copy any files to images directory.
+  $paths = array();
+  $paths['from'] = mtheme_images_path($selector);
+  $paths['to'] = mtheme_images_path($selector, 'mtheme');
+  mtheme_copy_files($selector, $paths);
+
 }
 
 /**

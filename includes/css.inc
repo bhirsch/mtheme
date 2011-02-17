@@ -16,31 +16,50 @@
  *
  * @param $selector
  *  object, new mtheme_selector 
+ * 
+ * @param $compile
+ *  boolean,
+ *  - TRUE: compile all mtheme selectors
+ *  - FALSE: only write individual selectors
  */
-function mtheme_css($selector = NULL) {
-  $css = mtheme_generate_css($selector);   
-  $written = mtheme_write_css($css);
+function mtheme_css($selector = NULL, $compile = FALSE) {
+  $css = mtheme_generate_css($selector, $compile);   
+  $written = mtheme_write_css($css, $compile);
   if (!$written) {
-    // TODO handle error here. Notify user.  
+    // @todo handle error here. Notify user.  
   }
+  return $css;
 }
 
 
 /**
- * Callback for admin/build/mtheme/css.
+ * Callback for admin/build/mtheme/css, (re-)build mtheme CSS cache.
  * 
- * Generate all CSS and display as a single style sheet.
+ * Compile CSS from all selectors, rewrite mtheme.css
+ * and re-copy all relevant files to mtheme/mtheme/images.
  */
-function mtheme_css_page() {
-  $txt = t('The style sheet below displays the current '
-    .'state of all your Module Theme CSS selectors compiled into '
-    .'a single style sheet. NOTE: This is not "the real stylesheet". '
-    .'Disabled selectors are displayed '
-    .'here, even though Drupal does not actually load CSS from disabled '
-    .'selectors.');
+function mtheme_rebuild_css() {
+  $link = l(t('Configure Module Theme.'), 'admin/settings/mtheme');
+  $txt = t('All your Module Theme selectors have been (re-)compiled '
+    .'into the stylesheet below. Improve performance by configuring Module Theme '
+    .'to always load this compiled stylesheet. '
+    .'Note: When you enable/disable modules with new module theme elements, '
+    .'this stylesheet will have to be rebuilt for changes to take effect. '
+    .'!settings ', 
+    array('!settings' => $link));
   drupal_set_message($txt);
 
-  $css = mtheme_generate_css(FALSE, TRUE);  
+  // (Re)-write CSS.
+  $css = mtheme_css(NULL, TRUE);  
+  // Refresh files, copy originals for each selector mtheme/mtheme/images.
+  $selectors = ctools_export_load_object('mtheme_selector');
+  $paths = array();
+  foreach ($selectors as $selector) {
+    $paths['from'] = mtheme_images_path($selector);
+    $paths['to'] = mtheme_images_path($selector, 'mtheme');
+    mtheme_copy_files($selector, $paths);
+  }
+  // Return CSS as output to display for user to see.
   $output = theme('mtheme_css_page', $css);
 
   return $output;
@@ -68,12 +87,21 @@ function mtheme_css_page() {
 function mtheme_generate_css($new_selector = NULL, $compile = FALSE) {
   $css = _mtheme_start_css();
 
-  if ($new_selector) {
+// TODO Check what happens here with new selectors. If they're not included in 
+//      $groups, make a way to include them.
+  if ($new_selector && !$compile) {
     $name = $new_selector->name;
     $css = _mtheme_write_selector_css($css, $new_selector); 
   } else if ($compile) {
-    $name = 'mtheme';
-    if ($groups = mtheme_get_groups()) {
+    // Include $new_selector in $groups, if a new selector is being saved.
+    if ($new_selector) {
+      $ns = array();
+      $ns[$new_selector->name] = $new_selector;
+    } else {
+      $ns = NULL;  
+    }
+    if ($groups = mtheme_get_groups(NULL, $ns)) {
+      $name = 'mtheme';
       foreach ($groups as $group) {
         $css = _mtheme_group_comment($css, $group); 
         foreach ($group['selectors'] as $selector) {
@@ -118,13 +146,25 @@ function mtheme_compose_css($a) {
  * 
  * @param $css
  *  Array. $css = array('name' => $name, 'css' => $css);
+ *
+ * @param $compile
+ *  boolean, TRUE -> compile all selectors and write a single stylesheet.
+ * 
+ * @param
  */ 
-function mtheme_write_css($css) {
+function mtheme_write_css($css, $compile = FALSE) {
   $file_contents = $css['css'];
-  $name = $css['name'];
-  // Set the location of the mtheme.css file
-  $mtheme_path = file_directory_path() .'/mtheme';
-  $file_path = $mtheme_path ."/$name/$name.css";
+  if ($compile) {
+    $name = 'mtheme';
+    // Set the location of the mtheme.css file
+    $mtheme_path = file_directory_path() .'/mtheme';
+    $file_path = $mtheme_path ."/mtheme/$name.css";
+  } else {
+    $name = $css['name'];
+    // Set the location of the mtheme.css file
+    $mtheme_path = file_directory_path() .'/mtheme';
+    $file_path = $mtheme_path ."/$name/$name.css";
+  } 
 
   // If the directory doesn't exist, create it
   $dir = file_check_directory($mtheme_path, FILE_CREATE_DIRECTORY);
