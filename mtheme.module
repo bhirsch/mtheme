@@ -114,10 +114,6 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
 /**
  * Add mtheme css files.
  *
- * @TODO Find out if Ctools is caching these objects. 
- *  Seems expensive to load them all each time to 
- *  check if enabled features have disabled selectors. 
- * 
  * Get all mtheme selectors
  *  
  *  $selectors
