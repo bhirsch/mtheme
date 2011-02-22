@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * @file
  *  Install mtheme module.
@@ -29,16 +30,16 @@ function mtheme_schema() {
       'key name' => 'Name',
       'primary key' => 'sid',
       'identifier' => 'selector', // Exports will be as $selector
-      'default hook' => 'default_mtheme_selector',  // Function hook name.
+      'default hook' => 'default_mtheme_selector', // Function hook name.
       'api' => array(
         'owner' => 'mtheme',
-        'api' => 'default_mtheme_selector',  // Base name for api include files.
+        'api' => 'default_mtheme_selector', // Base name for api include files.
         'minimum_version' => 1,
         'current_version' => 1,
       ),
     ),
     'fields' => array(
-      // selector id 
+      // selector id
       'sid' => array(
         'type' => 'serial',
         'unsigned' => TRUE,
@@ -48,71 +49,71 @@ function mtheme_schema() {
       ),
       // name (machine, unique id)
       'name' => array(
-        'type' => 'varchar',  
-        'length' => 64,      
-        'not null' => TRUE, 
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Unique ID for this object. Used to identify it programmatically.'),
       ),
       // title (human readable)
       'title' => array(
-        'type' => 'varchar',  
-        'length' => 64,      
-        'not null' => TRUE, 
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Human readable title.'),
       ),
       // group
-      'grp' => array(  // the word "group" causes problems, use grp instead
-        'type' => 'varchar',  
-        'length' => 64,      
-        'not null' => TRUE, 
+      'grp' => array(// the word "group" causes problems, use grp instead
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Organize selectors into groups, like Context tags or '
-                          .'module packages. Groups are included in CSS comments '
-                          .'above selectors.'),
+                          . 'module packages. Groups are included in CSS comments '
+                          . 'above selectors.'),
       ),
-      // description 
+      // description
       'description' => array(
-        'type' => 'varchar',  
-        'length' => 255,      
-        'not null' => TRUE, 
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Optional description of selector.'),
       ),
       /*
-      // CSS comment
-      'css_comment' => array(
-        'type' => 'varchar',  
-        'length' => 255,      
-        'not null' => TRUE, 
-        'default' => '',
-        'description' => t('Comment to include in .css file above selector.'),
-      ),
-      // */
-      // css selector 
+ // CSS comment
+ 'css_comment' => array(
+ 'type' => 'varchar',
+ 'length' => 255,
+ 'not null' => TRUE,
+ 'default' => '',
+ 'description' => t('Comment to include in .css file above selector.'),
+ ),
+ // */
+      // css selector
       'css_selector' => array(
-        'type' => 'text',  
-        'not null' => TRUE, 
+        'type' => 'text',
+        'not null' => TRUE,
         'default' => '',
         'description' => t('CSS selector. E.g. div or  div#example .demo '),
       ),
       // css properties
       'css_properties' => array(
-        'type' => 'text',  
-        'not null' => TRUE, 
+        'type' => 'text',
+        'not null' => TRUE,
         'default' => '',
         'description' => t('E.g. background-color: white; <br/> font-size: 12px; '),
       ),
-      // selector weight 
+      // selector weight
       'weight' => array(
         'type' => 'int',
         'unsigned' => FALSE,
         'not null' => TRUE,
         'default' => 0,
         'description' => t('CSS selector weight. If the same selector appears '
-                          .'multiple times, they will be writen to the style sheet '
-                          .'in order of weight (lightest first, heavest last).'),
+                          . 'multiple times, they will be writen to the style sheet '
+                          . 'in order of weight (lightest first, heavest last).'),
       ),
     ),
     'primary key' => array('sid'),
@@ -126,7 +127,7 @@ function mtheme_schema() {
 
 /**
  * Implementation of hook_update_N.
- * 
+ *
  * Change css_selector field from varchar to text.
  */
 function mtheme_update_6001() {

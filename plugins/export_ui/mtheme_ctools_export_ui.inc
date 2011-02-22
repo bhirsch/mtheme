@@ -3,16 +3,14 @@
  * Define this Export UI plugin.
  */
 $plugin = array(
-  'schema' => 'mtheme_selector',  // As defined in hook_schema(), mymodule_myobj.
-  'access' => 'administer mtheme',  // Define a permission users must have to access these pages.
-
+  'schema' => 'mtheme_selector', // As defined in hook_schema(), mymodule_myobj.
+  'access' => 'administer mtheme', // Define a permission users must have to access these pages.
   // Define the menu item.
   'menu' => array(
     'menu item' => 'mtheme',
     'menu title' => t('Module Theme'),
     'menu description' => t('Administer Module Theme selectors.'),
   ),
-
   // Define user interface texts.
   'title singular' => t('selector'),
   'title plural' => t('selectors'),
@@ -31,32 +29,33 @@ $plugin = array(
 );
 
 /**
-* Define the preset add/edit form.
-*/
+ * Define the preset add/edit form.
+ */
 function mtheme_ctools_export_ui_form(&$form, &$form_state) {
   if (arg(5) == 'edit') {
     $selector = $form_state['item'];
-  } else if (arg(5) == 'clone') {
+  }
+  else if (arg(5) == 'clone') {
     $name = arg(4);
     $selector = mtheme_selector_load($name);
   }
 
   // mtheme's configuration interface.
   /* Ctools includes this field automatically on its own.
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Machine Name'),
-    '#description' => t('lowercase, no spaces or punctuation'),
-    '#default_value' => $selector->name,
-    '#required' => true,
-  );
-  // */
+   $form['name'] = array(
+   '#type' => 'textfield',
+   '#title' => t('Machine Name'),
+   '#description' => t('lowercase, no spaces or punctuation'),
+   '#default_value' => $selector->name,
+   '#required' => true,
+   );
+   // */
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
     '#description' => t('Human readable CSS selector name. '
-                       .'This will be included in .css file as a comment '
-                       .'above the selector.'),
+                       . 'This will be included in .css file as a comment '
+                       . 'above the selector.'),
     '#default_value' => $selector->title,
     '#required' => FALSE,
   );
@@ -98,28 +97,29 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
       $title = "images/$file->basename";
       $link = l($title, $file->filename);
       // Add form items
-      $item = $file->basename .'-'. $i;
+      $item = $file->basename . '-' . $i;
       $form['files'][$item] = array(
         '#type' => 'item',
-        '#title' => t("File "). $i,
+        '#title' => t("File ") . $i,
         '#value' => $link,
         '#description' => t("Add this file to your CSS like this: "
-                           ."background: url('". $title ."');"),
+                           . "background: url('" . $title . "');"),
       );
-      $i++; 
+      $i++;
     }
-  } else if (arg(3) == 'add') {  
+  }
+  else if (arg(3) == 'add') {
     $form['files'] = array(
       '#type' => 'item',
       '#title' => t('Files'),
       '#value' => t('Save then click Edit to add background files here.'),
-    );  
+    );
   }
   $form['grp'] = array(
     '#type' => 'textfield',
     '#title' => t('CSS Selector Group'),
     '#description' => t("Group selectors together. (Use your module name "
-                       ."or site name if you're not sure what to put here.)"),
+                       . "or site name if you're not sure what to put here.)"),
     '#default_value' => $selector->grp,
     '#required' => TRUE,
   );
@@ -137,7 +137,7 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#default_value' => $selector->weight,
     '#required' => FALSE,
   );
-  // Keep track of whether the subtheme was in code only when form 
+  // Keep track of whether the subtheme was in code only when form
   // was built.
   $form['in_code_only'] = array(
     '#type' => 'hidden',
@@ -147,16 +147,16 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
 
 /**
  * When a selector is saved (added, edited or cloned)
- * re-write css for that selector. 
- * 
- * When a selector changes states from in_code_only to 
+ * re-write css for that selector.
+ *
+ * When a selector changes states from in_code_only to
  * stored in the database + files directory, copy image files
  * from features module into files directory.
- * 
+ *
  * @todo There's probably a more efficient way to do this than
- * re-writing the CSS after each new selector is saved, but 
- * for now, doing it this way keeps it simple. 
- * 
+ * re-writing the CSS after each new selector is saved, but
+ * for now, doing it this way keeps it simple.
+ *
  * There is no extravagant naming convention magic here.
  * This function is just called mymodule_ctoolform_submit, that is
  * mtheme _ ctools_export_ui_edit_item_form _ submit.
@@ -177,7 +177,8 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
     if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
       $paths['from'] = mtheme_images_path($selector, 'in code only');
       $paths['to'] = mtheme_images_path($selector, 'files');
-    } else if ($clone) {
+    }
+    else if ($clone) {
       $name = arg(4);
       $original_selector = mtheme_selector_load($name);
       $paths['from'] = mtheme_images_path($original_selector);
@@ -207,43 +208,45 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   $name = $form_state['item']->name;
   $selector = mtheme_selector_load($name);
   // delete style sheet
-  $path = file_directory_path() ."/mtheme/$name/$name.css";
+  $path = file_directory_path() . "/mtheme/$name/$name.css";
   file_delete($path);
-  // delete image files 
-  $path = mtheme_images_path($selector);  
+  // delete image files
+  $path = mtheme_images_path($selector);
   foreach (@file_scan_directory($path, '.*') as $file) {
     file_delete($file->filename);
   }
   // remove directories
-  $path = file_directory_path() ."/mtheme/$name/images";
+  $path = file_directory_path() . "/mtheme/$name/images";
   if (file_check_directory($path)) {
     $result = rmdir($path);
     if ($result) {
-      $txt = $path . t(' deleted.');  
+      $txt = $path . t(' deleted.');
       drupal_set_message($txt);
-    } else {
-      $txt = $path . t(' could not be deleted.'); 
+    }
+    else {
+      $txt = $path . t(' could not be deleted.');
     }
   }
-  $path = file_directory_path() ."/mtheme/$name";
+  $path = file_directory_path() . "/mtheme/$name";
   if (file_check_directory($path)) {
     $result = rmdir($path);
     if ($result) {
-      $txt = $path . t(' deleted.');  
+      $txt = $path . t(' deleted.');
       drupal_set_message($txt);
-    } else {
-      $txt = $path . t(' could not be deleted.'); 
+    }
+    else {
+      $txt = $path . t(' could not be deleted.');
     }
   }
 }
 
 /**
  * Save image files.
- * 
+ *
  * Images should get saved like this:
  * files/$selector_name/images/imageX.jpg
- * 
- * Callback for #element_validate on 
+ *
+ * Callback for #element_validate on
  * #files element of admin/build/mtheme/add and /edit form.
  */
 function mtheme_save_files($form, &$form_state) {
@@ -255,16 +258,16 @@ function mtheme_save_files($form, &$form_state) {
     // Get file extension.
     $parts = pathinfo($file->filename);
     // Check for file directory. Create if needed.
-    $directory = file_directory_path() .'/mtheme';
+    $directory = file_directory_path() . '/mtheme';
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for files/myselector directory. Create if needed.
-    $directory = file_directory_path() .'/mtheme/'. $name;
+    $directory = file_directory_path() . '/mtheme/' . $name;
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for files/myselector/images file directory. Create if needed.
-    $directory = $directory ."/images";
+    $directory = $directory . "/images";
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
-    //Name the file. 
-    $file_path = $directory ."/". $file->filename;
+    //Name the file.
+    $file_path = $directory . "/" . $file->filename;
     // The image was saved using file_save_upload() and was added to the
     // files table as a temporary file. We'll make a copy and let the garbage
     // collector delete the original upload.
