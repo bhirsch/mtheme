@@ -228,6 +228,10 @@ function mtheme_add_css() {
 function mtheme_images_path($selector, $status = FALSE) {
   $name = $selector->name;
 
+  // Handle 'undefined property' errors.
+  if (!property_exists($selector, 'in_code_only')) {
+    $selector->in_code_only = FALSE;
+  } 
   if (!$status && $selector->in_code_only || $status == 'in code only') {
     $feature = mtheme_get_feature($name);
     $module_name = $feature->name;
@@ -235,13 +239,14 @@ function mtheme_images_path($selector, $status = FALSE) {
     $path = $module_path . "/mtheme/$name/images";
   }
   else if ($status == 'mtheme') {
-    $path = file_directory_path() . "/mtheme/mtheme/images";
+    //$path = file_directory_path() . "/mtheme/mtheme/images";
+    $path = file_build_uri("/mtheme/mtheme/images");
   }
   else {
-    $path = file_directory_path() . "/mtheme/$name/images";
+    //$path = file_directory_path() . "/mtheme/$name/images";
+    $path = file_build_uri("/mtheme/$name/images");
   }
   return $path;
-  // */
 }
 
 /**

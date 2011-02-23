@@ -26,6 +26,9 @@ To "mtheme-enable" any theme on your site, copy and paste the following
 snippet of code into the bottom of your theme(s) template.php file
 (below the last function in the file): 
 
+/**
+ * Add Module Theme CSS.
+ */
 if (module_exists('mtheme')) {
   mtheme_add_css();  
 }

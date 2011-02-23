@@ -159,41 +159,33 @@ function mtheme_compose_css($a) {
  */
 function mtheme_write_css($css, $compile = FALSE) {
   $file_contents = $css['css'];
+  // Build destination URI for CSS file.
+  $mtheme_path = file_build_uri('mtheme');
   if ($compile) {
     $name = 'mtheme';
-    // Set the location of the mtheme.css file
-    $mtheme_path = file_directory_path() . '/mtheme';
-    $file_path = $mtheme_path . "/mtheme/$name.css";
   }
   else {
     $name = $css['name'];
-    // Set the location of the mtheme.css file
-    $mtheme_path = file_directory_path() . '/mtheme';
-    $file_path = $mtheme_path . "/$name/$name.css";
   }
+  $destination = $mtheme_path . "/$name/$name.css";
+  // Normalize $destination for good measure. (This step is probably unnecessary.)
+  $destination = file_stream_wrapper_uri_normalize($destination);
 
   // If the directory doesn't exist, create it
-  $dir = file_prepare_directory($mtheme_path, FILE_CREATE_DIRECTORY);
-  if (!$dir) {
-    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
-    drupal_set_message($txt, 'error');
-  }
-  $dir = file_prepare_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
-  if (!$dir) {
-    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
+  if (!file_prepare_directory(drupal_dirname($destination), FILE_CREATE_DIRECTORY)) {
+    $txt = t('The function file_prepare_directory() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
   }
 
   // Create CSS file.
-  $saved = file_save_data($file_contents, $file_path, FILE_EXISTS_REPLACE);
-  if (!$saved) {
+  if (!file_save_data($file_contents, $destination, FILE_EXISTS_REPLACE)) {
     $txt = t('The function file_save_data() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
   }
 
   // Notify user about new CSS
   $txt = t('New CSS file created: !file',
-          array('!file' => l($file_path, $file_path)));
+          array('!file' => l("$name.css", file_create_url($destination))));
 
   drupal_set_message($txt);
 }
