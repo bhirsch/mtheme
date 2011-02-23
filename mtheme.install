@@ -6,25 +6,11 @@
  */
 
 /**
- * Implementation of hook_install().
- */
-function mtheme_install() {
-  drupal_install_schema('mtheme');
-}
-
-/**
- * Implementation of hook_uninstall().
- */
-function mtheme_uninstall() {
-  drupal_uninstall_schema('mtheme');
-}
-
-/**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function mtheme_schema() {
   $schema['mtheme_selector'] = array(
-    'description' => t('Table storing theme (myobj), definitions.'),
+    'description' => 'Table storing theme (myobj), definitions.',
     'export' => array(
       'key' => 'name',
       'key name' => 'Name',
@@ -44,7 +30,7 @@ function mtheme_schema() {
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => t('Primary ID field for the table. Not used for anything except internal lookups.'),
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
         'no export' => TRUE, // Do not export database-only keys.
       ),
       // name (machine, unique id)
@@ -53,7 +39,7 @@ function mtheme_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Unique ID for this object. Used to identify it programmatically.'),
+        'description' => 'Unique ID for this object. Used to identify it programmatically.',
       ),
       // title (human readable)
       'title' => array(
@@ -61,7 +47,7 @@ function mtheme_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Human readable title.'),
+        'description' => 'Human readable title.',
       ),
       // group
       'grp' => array(// the word "group" causes problems, use grp instead
@@ -69,9 +55,7 @@ function mtheme_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Organize selectors into groups, like Context tags or '
-                          . 'module packages. Groups are included in CSS comments '
-                          . 'above selectors.'),
+        'description' => 'Organize selectors into groups, like Context tags or ',
       ),
       // description
       'description' => array(
@@ -79,7 +63,7 @@ function mtheme_schema() {
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Optional description of selector.'),
+        'description' => 'Optional description of selector.',
       ),
       /*
  // CSS comment
@@ -96,14 +80,14 @@ function mtheme_schema() {
         'type' => 'text',
         'not null' => TRUE,
         'default' => '',
-        'description' => t('CSS selector. E.g. div or  div#example .demo '),
+        'description' => 'CSS selector. E.g. div or  div#example .demo ',
       ),
       // css properties
       'css_properties' => array(
         'type' => 'text',
         'not null' => TRUE,
         'default' => '',
-        'description' => t('E.g. background-color: white; <br/> font-size: 12px; '),
+        'description' => 'E.g. background-color: white; <br/> font-size: 12px; ',
       ),
       // selector weight
       'weight' => array(
@@ -111,9 +95,7 @@ function mtheme_schema() {
         'unsigned' => FALSE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => t('CSS selector weight. If the same selector appears '
-                          . 'multiple times, they will be writen to the style sheet '
-                          . 'in order of weight (lightest first, heavest last).'),
+        'description' => 'CSS selector weight. If the same selector appears ',
       ),
     ),
     'primary key' => array('sid'),
@@ -126,7 +108,7 @@ function mtheme_schema() {
 }
 
 /**
- * Implementation of hook_update_N.
+ * Implements hook_update_N().
  *
  * Change css_selector field from varchar to text.
  */
@@ -141,5 +123,5 @@ function mtheme_update_6001() {
     'default' => '',
     'description' => t('CSS selector. E.g. div or  div#example .demo '),
   );
-  db_change_field(&$ret, $table, $field, $field_new, $spec, $new_keys = array());
+  db_change_field($table, $field, $field_new, $spec, $new_keys = array());
 }

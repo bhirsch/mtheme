@@ -8,7 +8,7 @@
 //--------------------------------//
 
 /**
- * Implementation of hook_help()
+ * Implements hook_help().
  */
 function mtheme_help($path, $arg) {
   if ($path == 'admin/help#mtheme') {
@@ -19,24 +19,24 @@ function mtheme_help($path, $arg) {
 }
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function mtheme_menu() {
-  $items['admin/build/mtheme/%/export'] = array(
+  $items['admin/structure/mtheme/%/export'] = array(
     'title' => 'export',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mtheme_export_selector', 3),
     'access arguments' => array('mtheme export'),
     'type' => MENU_CALLBACK,
   );
-  $items['admin/build/mtheme/css'] = array(
+  $items['admin/structure/mtheme/css'] = array(
     'title' => t('Rebuild CSS'),
     'page callback' => 'mtheme_rebuild_css',
     'access arguments' => array('administer mtheme'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/css.inc',
   );
-  $items['admin/settings/mtheme'] = array(
+  $items['admin/config/mtheme'] = array(
     'title' => t('Module Theme Settings'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mtheme_admin_settings'),
@@ -49,14 +49,23 @@ function mtheme_menu() {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_permission().
  */
-function mtheme_perm() {
-  return array('mtheme export', 'administer mtheme');
+function mtheme_permission() {
+  return array(
+    'mtheme export' => array(
+      'title' => t('mtheme export'),
+      'description' => t('Export CSS selectors.'),
+    ),
+    'administer mtheme' => array(
+      'title' => t('administer mtheme'),
+      'description' => t('Create, edit, delete, and enable/disable CSS selectors.'),
+    ),
+  );
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function mtheme_theme() {
   return array(
@@ -64,15 +73,24 @@ function mtheme_theme() {
     //   'arguments' => array('element' => NULL),
     // ),
     'mtheme_css_page' => array(
-      'css' => array('css' => NULL),
+      'variables' => array('css' => NULL),
     ),
   );
 }
 
 /**
  * Theme function for admin/build/mtheme/css.
+ *
+ * @param $variables
+ *  - $variables['css']['css'] is a string containing the content of the CSS
+ *    file to be written. 
+ *  - $variables['css']['name'] is a string containing the machine name of 
+ *    the CSS selector being written.
+ *
+ * @return $output
+ *  HTML
  */
-function theme_mtheme_css_page($css) {
+function theme_mtheme_css_page($variables) {
   $path = drupal_get_path('module', 'mtheme') . '/mtheme.css';
   drupal_add_css($path);
   $output = "<pre><div class='mtheme-css-page'>" . $css['css'] . "</div></pre>";
@@ -81,7 +99,7 @@ function theme_mtheme_css_page($css) {
 }
 
 /**
- * Implementation of hook_form_alter().
+ * Implements hook_form_alter().
  *
  * @todo subtheme module stores all these submit, validate,
  *  delete functions in subtheme_ctools_export_ui.inc. I think that's
@@ -135,7 +153,7 @@ function mtheme_add_css() {
   // If compile is enabled, load the single, compiled stylesheet.
   if (variable_get('mtheme_compile', FALSE)) {
     $stylesheet = file_directory_path() . "/mtheme/mtheme/mtheme.css";
-    drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+    drupal_add_css($stylesheet, array('type' => 'file', 'weight' => CSS_THEME));
   }
   else { // Load each selector's stylesheet individually.
     // Get selectors from Ctools.
@@ -171,7 +189,7 @@ function mtheme_add_css() {
           if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
             $path = drupal_get_path('module', $module_name);
             $stylesheet = $path . "/mtheme/$name/$name.css"; // @todo maybe we don't
-            drupal_add_css($stylesheet, 'theme', 'all', TRUE); //  need stylesheets in
+            drupal_add_css($stylesheet, array('type' => 'file', 'weight' => CSS_THEME)); //  need stylesheets in
           } //  .info files anymore?
         }
       }
@@ -181,7 +199,7 @@ function mtheme_add_css() {
     foreach ($in_database as $name) {
       if (!in_array($name, $disabled)) {
         $stylesheet = file_directory_path() . "/mtheme/$name/$name.css";
-        drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+        drupal_add_css($stylesheet, array('type' => 'file', 'weight' => CSS_THEME));
       }
     }
   }
@@ -273,8 +291,10 @@ function mtheme_copy_files($selector, $paths) {
   // Copy images.
   $images_path = $paths['from'];
   $new_images_path = $paths['to'];
-  file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
-  foreach (@file_scan_directory($images_path, '.*') as $file) {
+  file_prepare_directory($new_images_path, FILE_CREATE_DIRECTORY);
+// @TODO Original below. Coder Update modified this function. Not sure it's right.
+// foreach (@file_scan_directory($path, '.*') as $file) {
+  foreach (@file_scan_directory($images_path, '/.*/') as $file) {
     $file_path = $new_images_path . "/" . $file->basename;
     file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
   }
@@ -381,7 +401,7 @@ function mtheme_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
- * Implementation of hook_ctools_plugin_api().
+ * Implements hook_ctools_plugin_api().
  *
  * Tell CTools that we support the default_mymodule_presets API.
  */
@@ -401,10 +421,11 @@ function mtheme_ctools_plugin_api($owner, $api) {
  * @param $name
  *  string, unique id for object
  */
-function mtheme_export_selector(&$form_state, $name) {
+function mtheme_export_selector($form, &$form_state, $name) {
   ctools_include('export');
   $obj = mtheme_selector_load($name);
-  drupal_set_title(check_plain($obj->description));
+  $title = check_plain($obj->description);
+  drupal_set_title($title);
   $code = mtheme_selector_export($obj);
   $lines = substr_count($code, "\n");
 
@@ -453,7 +474,7 @@ function mtheme_selector_save(&$myobj) {
 //-------------------------------------------------/
 
 /**
- * Implementation of hook_features_export().
+ * Implements hook_features_export().
  *
  * Component hook.
  *
@@ -485,7 +506,7 @@ function mtheme_selector_features_export($data, &$export, $module_name) {
 }
 
 /**
- * Implementation of hook_features_files().
+ * Implements hook_features_files().
  *
  * @todo This hook is provided by a patched version of
  * Features. See http://github.com/bhirsch/features.
@@ -509,7 +530,9 @@ function mtheme_features_files($export, $module_name) {
       // Check for images.
       $selector = mtheme_selector_load($name);
       $images_path = mtheme_images_path($selector);
-      foreach (@file_scan_directory($images_path, '.*') as $file) {
+// @TODO Original below. Coder Update modified this function. Not sure it's right.
+// foreach (@file_scan_directory($images_path, '.*') as $file) {
+      foreach (@file_scan_directory($images_path, '/.*/') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;
         $add_files[$i]->basename = $file->basename;
@@ -571,7 +594,7 @@ function mtheme_features_files($export, $module_name) {
  * Begin CSS with timestamp in comment at the top.
  */
 function _mtheme_start_css() {
-  $time = time();
+  $time = REQUEST_TIME;
   $date = date("F j, Y, g:i a");
   global $base_url;
 

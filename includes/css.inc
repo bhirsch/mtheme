@@ -40,7 +40,7 @@ function mtheme_css($selector = NULL, $compile = FALSE) {
  * and re-copy all relevant files to mtheme/mtheme/images.
  */
 function mtheme_rebuild_css() {
-  $link = l(t('Configure Module Theme.'), 'admin/settings/mtheme');
+  $link = l(t('Configure Module Theme.'), 'admin/config/mtheme');
   $txt = t('All your Module Theme selectors have been (re-)compiled '
     . 'into the stylesheet below. Improve performance by configuring Module Theme '
     . 'to always load this compiled stylesheet. '
@@ -173,12 +173,12 @@ function mtheme_write_css($css, $compile = FALSE) {
   }
 
   // If the directory doesn't exist, create it
-  $dir = file_check_directory($mtheme_path, FILE_CREATE_DIRECTORY);
+  $dir = file_prepare_directory($mtheme_path, FILE_CREATE_DIRECTORY);
   if (!$dir) {
     $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
   }
-  $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
+  $dir = file_prepare_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
   if (!$dir) {
     $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');

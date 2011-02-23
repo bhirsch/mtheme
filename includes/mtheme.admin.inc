@@ -9,7 +9,7 @@
  * @ingroup forms
  * @see system_settings_form().
  */
-function mtheme_admin_settings() {
+function mtheme_admin_settings($form, &$form_state) {
   $form['mtheme_compile'] = array(
     '#type' => 'checkbox',
     '#title' => t('Compile Module Theme CSS into a single stylesheet'),

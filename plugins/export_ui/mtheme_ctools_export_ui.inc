@@ -93,7 +93,9 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     // Check for available files
     $path = mtheme_images_path($selector); //Path to files dir or features module w files.
     $i = 0; // Use counter in case of conflicting $file->basename values
-    foreach (@file_scan_directory($path, '.*') as $file) {
+// TODO Double check. Original below. I'm not sure about Coder update's change here.
+//  foreach (@file_scan_directory($path, '.*') as $file) {
+    foreach (@file_scan_directory($path, '/.*/') as $file) {
       $title = "images/$file->basename";
       $link = l($title, $file->filename);
       // Add form items
@@ -212,12 +214,14 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   file_delete($path);
   // delete image files
   $path = mtheme_images_path($selector);
-  foreach (@file_scan_directory($path, '.*') as $file) {
+// TODO Double check. Original below. I'm not sure about Coder update's change here.
+//foreach (@file_scan_directory($path, '.*') as $file) {
+  foreach (@file_scan_directory($path, '/.*/') as $file) {
     file_delete($file->filename);
   }
   // remove directories
   $path = file_directory_path() . "/mtheme/$name/images";
-  if (file_check_directory($path)) {
+  if (file_prepare_directory($path)) {
     $result = rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
@@ -228,7 +232,7 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
     }
   }
   $path = file_directory_path() . "/mtheme/$name";
-  if (file_check_directory($path)) {
+  if (file_prepare_directory($path)) {
     $result = rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
@@ -259,13 +263,13 @@ function mtheme_save_files($form, &$form_state) {
     $parts = pathinfo($file->filename);
     // Check for file directory. Create if needed.
     $directory = file_directory_path() . '/mtheme';
-    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for files/myselector directory. Create if needed.
     $directory = file_directory_path() . '/mtheme/' . $name;
-    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for files/myselector/images file directory. Create if needed.
     $directory = $directory . "/images";
-    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     //Name the file.
     $file_path = $directory . "/" . $file->filename;
     // The image was saved using file_save_upload() and was added to the

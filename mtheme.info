@@ -1,9 +1,16 @@
 ; $Id $
 name = Module Theme
 description = Expose module theming to site administrators through a GUI.
-core = 6.x
+core = 7.x
 version = "6.x-1.0"
 package = "Subtheme"
 project = "Module Theme"
 dependencies[] = ctools
 dependencies[] = features
+
+files[] = mtheme.install
+files[] = mtheme.module
+files[] = includes/css.inc
+files[] = includes/mtheme.admin.inc
+files[] = export_ui/mtheme_ctools_export_ui.inc
+files[] = export_ui/mtheme_export_ui.class.php
