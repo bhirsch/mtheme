@@ -642,6 +642,9 @@ function _mtheme_write_selector_css($css = NULL, $selector) {
   $css = _mtheme_selector_comment($css, $selector);
 
   // Add selector and properties.
+  if (!property_exists($selector, 'disabled')) {
+    $selector->disabled = FALSE; 
+  }
   if (!$selector->disabled) {
 
     // Incase there are multiple selectors, separated by commas and line breaks:

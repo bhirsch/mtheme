@@ -38,6 +38,8 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
   else if (arg(5) == 'clone') {
     $name = arg(4);
     $selector = mtheme_selector_load($name);
+  } else {
+    $selector = FALSE;   
   }
 
   // mtheme's configuration interface.
@@ -50,27 +52,30 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
    '#required' => true,
    );
    // */
+  $title = ($selector) ? $selector->title : '';
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
     '#description' => t('Human readable CSS selector name. '
                        . 'This will be included in .css file as a comment '
                        . 'above the selector.'),
-    '#default_value' => $selector->title,
+    '#default_value' => $title,
     '#required' => FALSE,
   );
+  $css_selector = ($selector) ? $selector->css_selector : '';
   $form['css_selector'] = array(
     '#type' => 'textarea',
     '#title' => t('CSS Selector'),
     '#description' => t('CSS selector. E.g. div or  div#example .demo '),
-    '#default_value' => $selector->css_selector,
+    '#default_value' => $css_selector,
     '#required' => true,
     '#rows' => 1,
   );
+  $css_properties = ($selector) ? $selector->css_properties : '';
   $form['css_properties'] = array(
     '#type' => 'textarea',
     '#title' => t('CSS Properties'),
-    '#default_value' => $selector->css_properties,
+    '#default_value' => $css_properties,
     '#description' => t('E.g. background-color: white; <br/> font-size: 12px; '),
     '#required' => true,
   );
@@ -117,33 +122,37 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#value' => t('Save then click Edit to add background files here.'),
     );
   }
+  $grp = ($selector) ? $selector->grp : ''; 
   $form['grp'] = array(
     '#type' => 'textfield',
     '#title' => t('CSS Selector Group'),
     '#description' => t("Group selectors together. (Use your module name "
                        . "or site name if you're not sure what to put here.)"),
-    '#default_value' => $selector->grp,
+    '#default_value' => $grp,
     '#required' => TRUE,
   );
+  $description = ($selector) ? $selector->description : '';
   $form['description'] = array(
     '#type' => 'textfield',
     '#title' => t('Description'),
     '#description' => t('Optional description.'),
-    '#default_value' => $selector->description,
+    '#default_value' => $description,
     '#required' => FALSE,
   );
+  $weight = ($selector) ? $selector->weight : '';
   $form['weight'] = array(
     '#type' => 'textfield',
     '#title' => t('Weight'),
     '#description' => t('Sort order of selectors for multiple identical selectors.'),
-    '#default_value' => $selector->weight,
+    '#default_value' => $weight,
     '#required' => FALSE,
   );
   // Keep track of whether the subtheme was in code only when form
   // was built.
+  $in_code_only = ($selector) ? $selector->in_code_only : FALSE;
   $form['in_code_only'] = array(
     '#type' => 'hidden',
-    '#value' => $selector->in_code_only,
+    '#value' => $in_code_only,
   );
 }
 
