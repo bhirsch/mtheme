@@ -13,7 +13,7 @@ function mtheme_admin_settings($form, &$form_state) {
   $form['mtheme_compile'] = array(
     '#type' => 'checkbox',
     '#title' => t('Compile Module Theme CSS into a single stylesheet'),
-    '#default_value' => variable_get('mtheme_compile', FALSE),
+    '#default_value' => variable_get('mtheme_compile', TRUE),
   );
 
   return system_settings_form($form);

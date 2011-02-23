@@ -151,9 +151,17 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
  */
 function mtheme_add_css() {
   // If compile is enabled, load the single, compiled stylesheet.
-  if (variable_get('mtheme_compile', FALSE)) {
-    $stylesheet = file_directory_path() . "/mtheme/mtheme/mtheme.css";
-    drupal_add_css($stylesheet, array('type' => 'file', 'weight' => CSS_THEME));
+  if (variable_get('mtheme_compile', TRUE)) {
+    //$stylesheet = file_directory_path() . "/mtheme/mtheme/mtheme.css";
+    $stylesheet = file_create_url(file_build_uri('/mtheme/mtheme/mtheme.css'));
+    $options = array(
+      'type' => 'file',
+//      'every_page' => TRUE,
+  //    'media' => 'all',
+      'group' => CSS_THEME,
+    );
+    drupal_add_css($stylesheet, $options);
+    drupal_add_css('sites/default/files/mtheme/mtheme/mtheme.css');
   }
   else { // Load each selector's stylesheet individually.
     // Get selectors from Ctools.
@@ -198,12 +206,24 @@ function mtheme_add_css() {
     // Load style sheets from files directory (in CSS in database)
     foreach ($in_database as $name) {
       if (!in_array($name, $disabled)) {
-        $stylesheet = file_directory_path() . "/mtheme/$name/$name.css";
-        drupal_add_css($stylesheet, array('type' => 'file', 'weight' => CSS_THEME));
+        //$stylesheet = file_directory_path() . "/mtheme/$name/$name.css";
+        $stylesheet = file_create_url(file_build_uri("/mtheme/$name/$name.css"));
+        drupal_add_css($stylesheet, array('type' => 'file'));
       }
     }
   }
 
+}
+
+function mtheme_init() {
+  $stylesheet = file_create_url(file_build_uri('mtheme/mtheme/compile.css'));
+  $options = array(
+    'group' => CSS_THEME, 
+    'every_page' => TRUE, 
+    'weight' => 100,
+    'type' => 'external',
+  );
+  drupal_add_css($stylesheet, $options);
 }
 
 /**

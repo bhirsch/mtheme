@@ -162,7 +162,7 @@ function mtheme_write_css($css, $compile = FALSE) {
   // Build destination URI for CSS file.
   $mtheme_path = file_build_uri('mtheme');
   if ($compile) {
-    $name = 'mtheme';
+    $name = 'compile';
   }
   else {
     $name = $css['name'];
