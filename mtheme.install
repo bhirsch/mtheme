@@ -30,7 +30,8 @@ function mtheme_schema() {
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'description' => 'Primary ID field for the table. Not used for anything '
+                       . 'except internal lookups.',
         'no export' => TRUE, // Do not export database-only keys.
       ),
       // name (machine, unique id)
@@ -39,7 +40,8 @@ function mtheme_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => 'Unique ID for this object. Used to identify it programmatically.',
+        'description' => 'Unique ID for this object. Used to identify it '
+                       . 'programmatically.',
       ),
       // title (human readable)
       'title' => array(
@@ -79,14 +81,12 @@ function mtheme_schema() {
       'css_selector' => array(
         'type' => 'text',
         'not null' => TRUE,
-        'default' => '',
         'description' => 'CSS selector. E.g. div or  div#example .demo ',
       ),
       // css properties
       'css_properties' => array(
         'type' => 'text',
         'not null' => TRUE,
-        'default' => '',
         'description' => 'E.g. background-color: white; <br/> font-size: 12px; ',
       ),
       // selector weight
@@ -120,7 +120,6 @@ function mtheme_update_6001() {
   $spec = array(
     'type' => 'text',
     'not null' => TRUE,
-    'default' => '',
     'description' => t('CSS selector. E.g. div or  div#example .demo '),
   );
   db_change_field($table, $field, $field_new, $spec, $new_keys = array());
