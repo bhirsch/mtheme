@@ -222,20 +222,20 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   $selector = mtheme_selector_load($name);
   // delete style sheet
   $public = new DrupalPublicStreamWrapper;
-  $public->getDirectoryPath();
+  $files_directory = $public->getDirectoryPath();
   $path = $files_directory . "/mtheme/$name/$name.css";
-  file_delete($path);
+  file_unmanaged_delete($path);
   // delete image files
   $path = mtheme_images_path($selector);
-// TODO Double check. Original below. I'm not sure about Coder update's change here.
-//foreach (@file_scan_directory($path, '.*') as $file) {
+  // TODO Double check. Original below. I'm not sure about Coder update's change here.
+  //foreach (@file_scan_directory($path, '.*') as $file) {
   foreach (@file_scan_directory($path, '/.*/') as $file) {
     file_delete($file->filename);
   }
   // remove directories
   $path = $files_directory . "/mtheme/$name/images";
   if (file_prepare_directory($path)) {
-    $result = rmdir($path);
+    $result = drupal_rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
       drupal_set_message($txt);
@@ -246,7 +246,7 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   }
   $path = $files_directory . "/mtheme/$name";
   if (file_prepare_directory($path)) {
-    $result = rmdir($path);
+    $result = drupal_rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
       drupal_set_message($txt);
