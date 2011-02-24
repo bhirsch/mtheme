@@ -116,7 +116,7 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
       // admin/build/mtheme/list/selector_name/edit
       (arg(3) == 'list' && ( arg(5) == 'edit' || arg(5) == 'clone' ) )) {
       // Call mtheme functions after new selectors are added or saved.
-      // $form['#validate'][] = 'mtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
+      $form['#validate'][] = 'mtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
       $form['#submit'][] = 'mtheme_ctools_export_ui_edit_item_form_submit';
     }
     // Modify forms for deleting and reverting mtheme objects
@@ -267,6 +267,7 @@ function mtheme_get_css_options() {
  *
  * @param $status
  *  string, 'in code only' OR 'files' OR 'mtheme' OR 'compile'
+ * 
  *  @todo Replace 'mtheme' status with 'compile', phase out use of 'mtheme'.
  *    In Drupal 6 files/mtheme/mtheme/mtheme.css was used. But Drupal 7 
  *    seems to have problems loading mtheme.css with drupal_add_css(). 
@@ -275,33 +276,36 @@ function mtheme_get_css_options() {
  * @return
  *  string, path/to/images/directory.
  */
-function mtheme_images_path($selector, $status = FALSE) {
+function mtheme_images_path($selector = NULL, $status = 'files') {
   $name = $selector->name;
 
   // Handle 'undefined property' errors.
   if (!property_exists($selector, 'in_code_only')) {
     $selector->in_code_only = FALSE;
   } 
-  if (!$status && $selector->in_code_only || $status == 'in code only') {
+  if ($selector->in_code_only || $status == 'in code only') {
     $feature = mtheme_get_feature($name);
     $module_name = $feature->name;
     $module_path = drupal_get_path('module', $module_name);
     $path = $module_path . "/mtheme/$name/images";
   }
-  else if ($status == 'mtheme' || 'compile') {
+  // Return path to all-images directory in files/mtheme/compile/images.
+  else if ($status == 'mtheme' || $status == 'compile') {
     // D6 //$path = file_directory_path() . "/mtheme/mtheme/images";
     // D7 //$path = file_build_uri("/mtheme/compile/images");
     $public = new DrupalPublicStreamWrapper;
     $files_directory = $public->getDirectoryPath();
     $path = $files_directory . "/mtheme/compile/images";
   }
-  else {
+  // Return path to selector-specific images directory in public files directory.
+  else if ($status == 'files') {
     // D6 //$path = file_directory_path() . "/mtheme/$name/images";
     // D7 //$path = file_build_uri("/mtheme/$name/images");
     $public = new DrupalPublicStreamWrapper;
     $files_directory = $public->getDirectoryPath();
     $path = $files_directory . "/mtheme/$name/images";
   }
+
   return $path;
 }
 
@@ -353,11 +357,10 @@ function mtheme_copy_files($selector, $paths) {
   $images_path = $paths['from'];
   $new_images_path = $paths['to'];
   file_prepare_directory($new_images_path, FILE_CREATE_DIRECTORY);
-// @TODO Original below. Coder Update modified this function. Not sure it's right.
-// foreach (@file_scan_directory($path, '.*') as $file) {
   foreach (@file_scan_directory($images_path, '/.*/') as $file) {
-    $file_path = $new_images_path . "/" . $file->basename;
-    file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+    $source = $file->uri;
+    $destination = $new_images_path . "/" . $file->filename;
+    file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
   }
   // return ? // @todo Add error handling. Notify user if unsuccessful?
   // These file functions do a pretty good job notifying

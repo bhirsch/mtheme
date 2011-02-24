@@ -1,5 +1,8 @@
 // $Id$
 
+@TODO Update for D7
+@TODO Add note about file name collisions in files/myselector/compile/images
+
 Module Theme (version 1.x)
 ----------------------------
 The Module Theme module enables you to:

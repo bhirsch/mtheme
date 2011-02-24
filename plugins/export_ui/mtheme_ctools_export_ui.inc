@@ -19,6 +19,7 @@ $plugin = array(
   // Define the names of the functions that provide the add/edit forms.
   'form' => array(
     'settings' => 'mtheme_ctools_export_ui_form',
+    //'validate' => 'mtheme_ctools_export_ui_edit_item_form_validate', 
     // 'submit' and 'validate' are also valid callbacks.
   ),
   // Use this to modify the default export UI interface.
@@ -91,30 +92,28 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['files']['file'] = array(
+    $form['files']['file_upload'] = array(
       '#type' => 'file',
-      '#title' => t('Files'),
+      '#title' => t('Upload image file'),
       '#size' => 30,
-      '#element_validate' => array('mtheme_save_files'),
+      '#description' => t('Upload files to use in your CSS.'),
     );
     // Check for available files
     $path = mtheme_images_path($selector); //Path to files dir or features module w files.
-    $i = 0; // Use counter in case of conflicting $file->basename values
-// TODO Double check. Original below. I'm not sure about Coder update's change here.
-//  foreach (@file_scan_directory($path, '.*') as $file) {
+    $i = 0; // Use counter in case of conflicting $file->name values
     foreach (@file_scan_directory($path, '/.*/') as $file) {
-      $title = "images/$file->basename";
-      $link = l($title, $file->filename);
+      $title = "images/$file->filename";
+      $link = l($title, $file->uri);
       // Add form items
-      $item = $file->basename . '-' . $i;
+      $item = $file->name . '-' . $i;
+      $i++;
       $form['files'][$item] = array(
         '#type' => 'item',
-        '#title' => t("File ") . $i,
-        '#value' => $link,
+        '#title' => $link,
         '#description' => t("Add this file to your CSS like this: "
-                           . "background: url('" . $title . "');"),
+                           . "background: url('!title');", 
+                           array('!title' => $title)),
       );
-      $i++;
     }
   }
   else if (arg(3) == 'add') {
@@ -159,57 +158,98 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
 }
 
 /**
+ * After form passes Ctools validation, validate it here.
+ * Prepare file to be saved.
+ */
+function mtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state) {
+  // Handle file uploads.
+  // This is the validator used for uploading a theme logo.
+  $validators = array('file_validate_is_image' => array());
+  // These validators are used for uploading favicons. 
+  // @todo Would these validators be more appropriate here?
+  //$validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
+
+  // Check for a new uploaded image.
+  $file = file_save_upload('file_upload', $validators);
+  if (isset($file)) {
+    // File upload was attempted.
+    if ($file) {
+      // Put the temporary file in form_values so we can save it on submit.
+      $form_state['values']['file_upload'] = $file;
+    }
+    else {
+      // File upload failed.
+      form_set_error('file_upload', t('The file could not be uploaded.'));
+    }
+  }
+}
+
+/**
  * When a selector is saved (added, edited or cloned)
  * re-write css for that selector.
  *
  * When a selector changes states from in_code_only to
  * stored in the database + files directory, copy image files
  * from features module into files directory.
- *
- * @todo There's probably a more efficient way to do this than
- * re-writing the CSS after each new selector is saved, but
- * for now, doing it this way keeps it simple.
- *
- * There is no extravagant naming convention magic here.
- * This function is just called mymodule_ctoolform_submit, that is
- * mtheme _ ctools_export_ui_edit_item_form _ submit.
  */
 function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   ctools_include('css', 'mtheme'); // include includes/css.inc
-
   $selector = $form_state['item'];
+  $values = $form_state['values'];
   $in_code_only = $form_state['values']['in_code_only'];
   $clone = (arg(5) == 'clone') ? TRUE : FALSE; // Existing selector is being cloned.
 
-  // (Re-)write css.
-  mtheme_css($selector); // @todo add error handling here?
+  // Handle files.
 
-  // Copy files into selector's directory.
+  // If the user uploaded a new file, save it to a permanent location.
+  if ($file = $values['file_upload']) {
+    unset($values['file_upload']);
+    $source = $file->uri;
+    // Save file to selector-specific directory here:
+    // files/$selector_name/images/imageX.jpg
+    $destination = mtheme_images_path($selector);
+    $filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
+    // Now make another copy available for compile.css here:
+    // files/mtheme/compile/images.
+    $destination = mtheme_images_path($selector, 'compile');
+    $filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
+  }
+
+  // If the selector is being overridden (stored in a module and now modified 
+  // through the GUI) or cloned, copy image files to public files directory.
   if ($in_code_only || $clone) {
     $paths = array();
     if ($in_code_only) { // Was in-code-only before submit. Not any more. Copy files.
+// TODO test this
       $paths['from'] = mtheme_images_path($selector, 'in code only');
       $paths['to'] = mtheme_images_path($selector, 'files');
     }
     else if ($clone) {
+// TODO test this
       $name = arg(4);
       $original_selector = mtheme_selector_load($name);
       $paths['from'] = mtheme_images_path($original_selector);
       $paths['to'] = mtheme_images_path($selector, 'files');
     }
+    // First copy files to the selector's images directory here:
+    // files/mtheme/$selector/images.
+    mtheme_copy_files($selector, $paths);
+    // Now copy files to compiled images directory here:
+    // files/mtheme/compile/images.
+// TODO test this
+    $paths['to'] = mtheme_images_path(NULL, 'compile');
     mtheme_copy_files($selector, $paths);
   }
 
-  // Rebuild mtheme cache.
-  // Recompile and rewrite CSS.
+  // Now handle CSS.
+
+  // (Re-)write selector.css.
+  mtheme_css($selector); // @todo add error handling here?
+
+  // Rebuild mtheme cache by recompiling and rewriting compile.css.
   $compile = TRUE;
   mtheme_css($selector, $compile);
-  // Copy any files to images directory.
-  $paths = array();
-  $paths['from'] = mtheme_images_path($selector);
-  $paths['to'] = mtheme_images_path($selector, 'mtheme');
-  mtheme_copy_files($selector, $paths);
-
+ 
 }
 
 /**
@@ -255,42 +295,4 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
       $txt = $path . t(' could not be deleted.');
     }
   }
-}
-
-/**
- * Save image files.
- *
- * Images should get saved like this:
- * files/$selector_name/images/imageX.jpg
- *
- * Callback for #element_validate on
- * #files element of admin/build/mtheme/add and /edit form.
- */
-function mtheme_save_files($form, &$form_state) {
-  // Get parent (the form element that called this function)
-  $parent = $form['#parents'][0];
-  // Check for a new uploaded file, and use that if available.
-  if ($file = file_save_upload($parent)) {
-    $name = $form_state['item']->name;
-    // Get file extension.
-    $parts = pathinfo($file->filename);
-    // Check for file directory. Create if needed.
-    $public = new DrupalPublicStreamWrapper;
-    $files_directory = $public->getDirectoryPath();
-    $directory = $files_directory . '/mtheme';
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    // Check for files/myselector directory. Create if needed.
-    $directory = $files_directory . '/mtheme/' . $name;
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    // Check for files/myselector/images file directory. Create if needed.
-    $directory = $directory . "/images";
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    //Name the file.
-    $file_path = $directory . "/" . $file->filename;
-    // The image was saved using file_save_upload() and was added to the
-    // files table as a temporary file. We'll make a copy and let the garbage
-    // collector delete the original upload.
-    file_copy($file, $file_path, FILE_EXISTS_REPLACE);
-  }
-  return $form;
 }
