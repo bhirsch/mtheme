@@ -40,7 +40,7 @@ function mtheme_menu() {
     'title' => t('Module Theme Settings'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mtheme_admin_settings'),
-    //    'page callback' => 'mtheme_admin_settings',
+    //'page callback' => 'mtheme_admin_settings',
     'access arguments' => array('administer mtheme'),
     'file' => 'includes/mtheme.admin.inc',
   );
@@ -149,21 +149,15 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
  *                   in database
  *
  */
-function mtheme_add_css() {
+function mtheme_init() {
   // If compile is enabled, load the single, compiled stylesheet.
   if (variable_get('mtheme_compile', TRUE)) {
-    //$stylesheet = file_directory_path() . "/mtheme/mtheme/mtheme.css";
-    $stylesheet = file_create_url(file_build_uri('/mtheme/mtheme/mtheme.css'));
-    $options = array(
-      'type' => 'file',
-//      'every_page' => TRUE,
-  //    'media' => 'all',
-      'group' => CSS_THEME,
-    );
+    $stylesheet = mtheme_get_compiled_css();
+    $options = mtheme_get_css_options(); 
     drupal_add_css($stylesheet, $options);
-    drupal_add_css('sites/default/files/mtheme/mtheme/mtheme.css');
   }
-  else { // Load each selector's stylesheet individually.
+  // If compile is not enabled, load each selector's stylesheet individually.
+  else {
     // Get selectors from Ctools.
     ctools_include('export');
     $selectors = ctools_export_load_object('mtheme_selector');
@@ -174,10 +168,10 @@ function mtheme_add_css() {
     $in_database = array();
     foreach ($selectors as $selector) {
       $name = $selector->name;
-      if ($selector->disabled) {
+      if (property_exists($selector, 'disabled') && $selector->disabled) {
         $disabled[] = $name;
       }
-      if ($selector->in_code_only) {
+      if (property_exists($selector, 'disabled') && $selector->in_code_only) {
         $in_code_only[] = $name;
       }
       if (!in_array($name, $in_code_only)) {
@@ -189,16 +183,19 @@ function mtheme_add_css() {
     $features = features_get_features();
     foreach ($features as $feature) {
       // Make sure the feature module is enabled and has mtheme selectors.
-      $mtheme_selectors = $feature->info['features']['mtheme_selector']; // @todo Devel backtrace shows an error here. Not sure what's causing the error.
-      if ($mtheme_selectors && $feature->status == 1) {
-        $module_name = $feature->name;
-        // Check each selector.
-        foreach ($mtheme_selectors as $name) {
-          if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
-            $path = drupal_get_path('module', $module_name);
-            $stylesheet = $path . "/mtheme/$name/$name.css"; // @todo maybe we don't
-            drupal_add_css($stylesheet, array('type' => 'file', 'weight' => CSS_THEME)); //  need stylesheets in
-          } //  .info files anymore?
+      if (isset($feature->info['features']['mtheme_selector'])) {
+        $mtheme_selectors = $feature->info['features']['mtheme_selector']; 
+        if ($mtheme_selectors && $feature->status == 1) {
+          $module_name = $feature->name;
+          // Check each selector.
+          foreach ($mtheme_selectors as $name) {
+            if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
+              $path = drupal_get_path('module', $module_name);
+              $stylesheet = $path . "/mtheme/$name/$name.css"; 
+              $options = mtheme_get_css_options(); 
+              drupal_add_css($stylesheet, $options);
+            } 
+          }
         }
       }
     }
@@ -206,24 +203,53 @@ function mtheme_add_css() {
     // Load style sheets from files directory (in CSS in database)
     foreach ($in_database as $name) {
       if (!in_array($name, $disabled)) {
-        //$stylesheet = file_directory_path() . "/mtheme/$name/$name.css";
-        $stylesheet = file_create_url(file_build_uri("/mtheme/$name/$name.css"));
-        drupal_add_css($stylesheet, array('type' => 'file'));
+        $public = new DrupalPublicStreamWrapper;
+        $files_directory = $public->getDirectoryPath();
+        $stylesheet = $files_directory . "/mtheme/$name/$name.css";
+        $options = mtheme_get_css_options(); 
+        drupal_add_css($stylesheet, $options);
       }
     }
   }
 
 }
 
-function mtheme_init() {
-  $stylesheet = file_create_url(file_build_uri('mtheme/mtheme/compile.css'));
-  $options = array(
+
+/**
+ * Get the path to compile.css, a single stylesheet including all the 
+ * mtheme css selectors.
+ * 
+ * @param $type
+ *  (optional) String. Designate what type of path should be returned.
+ *  - 'relative' returns a path relative to Drupal's root directory.
+ *  - 'url' returns a URL.
+ * 
+ * @return $path
+ *  String. Relative or absolute path to stylesheet including all mtheme css selectors.
+ */
+function mtheme_get_compiled_css($type = 'relative') {
+  // This is the D7 equivalent of file_directory_path().
+  $public = new DrupalPublicStreamWrapper;
+  $files_directory = $public->getDirectoryPath();
+  // Build relative path.
+  $path = $files_directory . '/mtheme/compile/compile.css';
+  // Build absolute URL.  
+  if ($type == 'url') {
+    $path = file_create_url($files_directory);
+  }
+  return $path;
+}
+
+/**
+ * @return $options array for drupal_add_css().
+ */
+function mtheme_get_css_options() {
+  return array(
     'group' => CSS_THEME, 
     'every_page' => TRUE, 
     'weight' => 100,
-    'type' => 'external',
+    'type' => 'file',
   );
-  drupal_add_css($stylesheet, $options);
 }
 
 /**
