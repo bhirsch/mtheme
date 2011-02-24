@@ -102,9 +102,10 @@ function mtheme_generate_css($new_selector = NULL, $compile = FALSE) {
     }
     else {
       $ns = NULL;
+      $new_selector->name = FALSE; // Handle undefined index errors on line 112.
     }
     if ($groups = mtheme_get_groups(NULL, $ns)) {
-      $name = 'mtheme';
+      $name = 'compile';
       foreach ($groups as $group) {
         $css = _mtheme_group_comment($css, $group);
         foreach ($group['selectors'] as $selector) {
@@ -118,7 +119,7 @@ function mtheme_generate_css($new_selector = NULL, $compile = FALSE) {
       }
     }
     else {
-      $name = 'mtheme';
+      $name = 'compile';
       $txt = t('there are no mtheme modules enabled');
       $css .= "\n  /* $txt */ ";
     }

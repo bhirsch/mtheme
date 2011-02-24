@@ -93,7 +93,7 @@ function mtheme_theme() {
 function theme_mtheme_css_page($variables) {
   $path = drupal_get_path('module', 'mtheme') . '/mtheme.css';
   drupal_add_css($path);
-  $output = "<pre><div class='mtheme-css-page'>" . $css['css'] . "</div></pre>";
+  $output = "<pre><div class='mtheme-css-page'>" . $variables['css'] . "</div></pre>";
 
   return $output;
 }
