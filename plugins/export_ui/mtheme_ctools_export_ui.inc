@@ -221,7 +221,9 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   $name = $form_state['item']->name;
   $selector = mtheme_selector_load($name);
   // delete style sheet
-  $path = file_directory_path() . "/mtheme/$name/$name.css";
+  $public = new DrupalPublicStreamWrapper;
+  $public->getDirectoryPath();
+  $path = $files_directory . "/mtheme/$name/$name.css";
   file_delete($path);
   // delete image files
   $path = mtheme_images_path($selector);
@@ -231,7 +233,7 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
     file_delete($file->filename);
   }
   // remove directories
-  $path = file_directory_path() . "/mtheme/$name/images";
+  $path = $files_directory . "/mtheme/$name/images";
   if (file_prepare_directory($path)) {
     $result = rmdir($path);
     if ($result) {
@@ -242,7 +244,7 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
       $txt = $path . t(' could not be deleted.');
     }
   }
-  $path = file_directory_path() . "/mtheme/$name";
+  $path = $files_directory . "/mtheme/$name";
   if (file_prepare_directory($path)) {
     $result = rmdir($path);
     if ($result) {
@@ -273,10 +275,12 @@ function mtheme_save_files($form, &$form_state) {
     // Get file extension.
     $parts = pathinfo($file->filename);
     // Check for file directory. Create if needed.
-    $directory = file_directory_path() . '/mtheme';
+    $public = new DrupalPublicStreamWrapper;
+    $files_directory = $public->getDirectoryPath();
+    $directory = $files_directory . '/mtheme';
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for files/myselector directory. Create if needed.
-    $directory = file_directory_path() . '/mtheme/' . $name;
+    $directory = $files_directory . '/mtheme/' . $name;
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     // Check for files/myselector/images file directory. Create if needed.
     $directory = $directory . "/images";

@@ -266,7 +266,11 @@ function mtheme_get_css_options() {
  *  object, mtheme_selector object.
  *
  * @param $status
- *  string, 'in code only' OR 'files' OR 'mtheme'
+ *  string, 'in code only' OR 'files' OR 'mtheme' OR 'compile'
+ *  @todo Replace 'mtheme' status with 'compile', phase out use of 'mtheme'.
+ *    In Drupal 6 files/mtheme/mtheme/mtheme.css was used. But Drupal 7 
+ *    seems to have problems loading mtheme.css with drupal_add_css(). 
+ *    Now the compiled stylesheet lives in files/mtheme/compile/compile.css.
  *
  * @return
  *  string, path/to/images/directory.
@@ -284,13 +288,19 @@ function mtheme_images_path($selector, $status = FALSE) {
     $module_path = drupal_get_path('module', $module_name);
     $path = $module_path . "/mtheme/$name/images";
   }
-  else if ($status == 'mtheme') {
-    //$path = file_directory_path() . "/mtheme/mtheme/images";
-    $path = file_build_uri("/mtheme/mtheme/images");
+  else if ($status == 'mtheme' || 'compile') {
+    // D6 //$path = file_directory_path() . "/mtheme/mtheme/images";
+    // D7 //$path = file_build_uri("/mtheme/compile/images");
+    $public = new DrupalPublicStreamWrapper;
+    $files_directory = $public->getDirectoryPath();
+    $path = $files_directory . "/mtheme/compile/images";
   }
   else {
-    //$path = file_directory_path() . "/mtheme/$name/images";
-    $path = file_build_uri("/mtheme/$name/images");
+    // D6 //$path = file_directory_path() . "/mtheme/$name/images";
+    // D7 //$path = file_build_uri("/mtheme/$name/images");
+    $public = new DrupalPublicStreamWrapper;
+    $files_directory = $public->getDirectoryPath();
+    $path = $files_directory . "/mtheme/$name/images";
   }
   return $path;
 }
@@ -568,7 +578,9 @@ function mtheme_features_files($export, $module_name) {
     // Get css files for each component.
     $i = 0;
     foreach ($mtheme_selectors as $name) {
-      $mtheme_path = file_directory_path() . '/mtheme/' . $name;
+      $public = new DrupalPublicStreamWrapper;
+      $files_directory = $public->getDirectoryPath();
+      $mtheme_path = $files_directory . '/mtheme/' . $name;
       // Get selector's CSS file
       //$add_files[$i]->name = $module_name .'.'. $name;
       $add_files[$i]->name = $name;
