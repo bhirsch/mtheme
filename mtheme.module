@@ -313,7 +313,19 @@ function mtheme_images_path($selector, $status = 'files', $type = 'relative') {
   }
 
   // Return path to selector-specific images directory in public files directory.
-  if ($status == 'files') {
+// TODO I just changed this: 
+  //if ($status == 'files') {
+  // to this: 
+  //if ($status == 'files' && $selector->in_code_only == FALSE) {
+  // to get subtheme working. (To add new subthemes.)
+  // But this breaks file handling when uploading new files 
+  // to an mtheme that is in default state at 
+  // admin/structure/mtheme/list/black_tracker/edit.
+if ($selector->in_code_only) {
+dsm("Known issue saving files. See line 316 in mtheme.module.");
+}
+  if ($status == 'files' && $selector->in_code_only == FALSE) {
+  //if ($status == 'files') {
     // D6 //$path = file_directory_path() . "/mtheme/$name/images";
     // D7 //$path = file_build_uri("/mtheme/$name/images");
     $path = $prefix . "mtheme/$name/images";

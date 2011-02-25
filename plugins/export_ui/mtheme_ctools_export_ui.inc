@@ -176,7 +176,7 @@ function mtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state) {
   //$validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
 
   // Check for a new uploaded image.
-  $file = file_save_upload('file_upload', $validators);
+  $file = file_save_upload('file_upload', $validators, FALSE, FILE_EXISTS_REPLACE);
   if (isset($file)) {
     // File upload was attempted.
     if ($file) {

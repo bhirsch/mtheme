@@ -161,14 +161,10 @@ function mtheme_compose_css($a) {
 function mtheme_write_css($css, $compile = FALSE) {
   $file_contents = $css['css'];
   // Build destination URI for CSS file.
-  $mtheme_path = file_build_uri('mtheme');
-  if ($compile) {
-    $name = 'compile';
-  }
-  else {
-    $name = $css['name'];
-  }
-  $destination = $mtheme_path . "/$name/$name.css";
+  //$mtheme_path = file_build_uri('mtheme');
+  $name = ($compile) ? 'compile' : $css['name'];
+  $file_path = "mtheme/$name/$name.css";
+  $destination = file_build_uri($file_path);
   // Normalize $destination for good measure. (This step is probably unnecessary.)
   $destination = file_stream_wrapper_uri_normalize($destination);
 
@@ -185,6 +181,8 @@ function mtheme_write_css($css, $compile = FALSE) {
   }
 
   // Notify user about new CSS
+  $public = new DrupalPublicStreamWrapper;
+  $file_path = $public->getDirectoryPath() . $file_path;
   $txt = t('New CSS file created: !file',
           array('!file' => l("$name.css", file_create_url($destination))));
 
