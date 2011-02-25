@@ -200,7 +200,16 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   $in_code_only = $form_state['values']['in_code_only'];
   $clone = (arg(5) == 'clone') ? TRUE : FALSE; // Existing selector is being cloned.
 
-  // Handle files.
+  // Handle CSS.
+
+  // (Re-)write selector.css.
+  mtheme_css($selector); // @todo add error handling here?
+
+  // Rebuild mtheme cache by recompiling and rewriting compile.css.
+  $compile = TRUE;
+  mtheme_css($selector, $compile);
+ 
+  // Now handle files.
 
   // If the user uploaded a new file, save it to a permanent location.
   if ($file = $values['file_upload']) {
@@ -209,10 +218,10 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
     $destination = array();
     // Save file to selector-specific directory here:
     // files/$selector_name/images/imageX.jpg
-    $destinations[1] = mtheme_images_path($selector);
+    $destinations[1] = mtheme_images_path($selector, 'files', 'uri');
     // Make another copy available for compile.css here:
     // files/mtheme/compile/images.
-    $destinations[2] = mtheme_images_path($selector, 'compile');
+    $destinations[2] = mtheme_images_path($selector, 'compile', 'uri');
     foreach ($destinations as $destination) {
       if (!file_prepare_directory($destination, FILE_CREATE_DIRECTORY)) {
         $txt = t("!destination could not be created.", 
@@ -248,19 +257,10 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
     // Now copy files to compiled images directory here:
     // files/mtheme/compile/images.
 // TODO test this
-    $paths['to'] = mtheme_images_path(NULL, 'compile');
+    $paths['to'] = mtheme_images_path($selector, 'compile');
     mtheme_copy_files($selector, $paths);
   }
 
-  // Now handle CSS.
-
-  // (Re-)write selector.css.
-  mtheme_css($selector); // @todo add error handling here?
-
-  // Rebuild mtheme cache by recompiling and rewriting compile.css.
-  $compile = TRUE;
-  mtheme_css($selector, $compile);
- 
 }
 
 /**

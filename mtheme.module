@@ -267,6 +267,13 @@ function mtheme_get_css_options() {
  *
  * @param $status
  *  string, 'in code only' OR 'files' OR 'mtheme' OR 'compile'
+ *
+ * @param $type
+ *  String. 
+ *  - 'relative', Return value should be a path relative to Drupal's root directory 
+ *    (e.g. sites/default/files/mtheme/myselector/images)
+ *  - 'uri', Return value should be something like: 
+ *     public://files/mtheme/myselector/images)
  * 
  *  @todo Replace 'mtheme' status with 'compile', phase out use of 'mtheme'.
  *    In Drupal 6 files/mtheme/mtheme/mtheme.css was used. But Drupal 7 
@@ -274,36 +281,56 @@ function mtheme_get_css_options() {
  *    Now the compiled stylesheet lives in files/mtheme/compile/compile.css.
  *
  * @return
- *  string, path/to/images/directory.
+ *  string, path/to/images/directory or public://path/to/images/directory
  */
-function mtheme_images_path($selector = NULL, $status = 'files') {
+function mtheme_images_path($selector, $status = 'files', $type = 'relative') {
   $name = $selector->name;
 
   // Handle 'undefined property' errors.
   if (!property_exists($selector, 'in_code_only')) {
     $selector->in_code_only = FALSE;
   } 
-  if ($selector->in_code_only || $status == 'in code only') {
-    $feature = mtheme_get_feature($name);
-    $module_name = $feature->name;
-    $module_path = drupal_get_path('module', $module_name);
-    $path = $module_path . "/mtheme/$name/images";
+
+  // Build prefix. The prefix will be one of these: 
+  // - sites/mysite.com/files/
+  // - sites/default/files/
+  // - public://
+  //
+  // It's one of the first two options above.
+  if ($type == 'relative') {
+    $public = new DrupalPublicStreamWrapper;
+    $prefix = $public->getDirectoryPath();
+    $prefix .= '/';
+  }
+  // This will almost always return public://, but it could be set
+  // to something else.
+  else if ($type == 'uri') {
+     $prefix = file_build_uri(''); 
+  } 
+  else {
+    $txt = t('No type defined. See function: mtheme_images_path() in mtheme.module.');  
+    drupal_set_message($txt, 'error');
+  }
+
+  // Return path to selector-specific images directory in public files directory.
+  if ($status == 'files') {
+    // D6 //$path = file_directory_path() . "/mtheme/$name/images";
+    // D7 //$path = file_build_uri("/mtheme/$name/images");
+    $path = $prefix . "mtheme/$name/images";
+    $path = file_stream_wrapper_uri_normalize($path);
   }
   // Return path to all-images directory in files/mtheme/compile/images.
   else if ($status == 'mtheme' || $status == 'compile') {
     // D6 //$path = file_directory_path() . "/mtheme/mtheme/images";
     // D7 //$path = file_build_uri("/mtheme/compile/images");
-    $public = new DrupalPublicStreamWrapper;
-    $files_directory = $public->getDirectoryPath();
-    $path = $files_directory . "/mtheme/compile/images";
+    $path = $prefix . "mtheme/compile/images";
+    $path = file_stream_wrapper_uri_normalize($path);
   }
-  // Return path to selector-specific images directory in public files directory.
-  else if ($status == 'files') {
-    // D6 //$path = file_directory_path() . "/mtheme/$name/images";
-    // D7 //$path = file_build_uri("/mtheme/$name/images");
-    $public = new DrupalPublicStreamWrapper;
-    $files_directory = $public->getDirectoryPath();
-    $path = $files_directory . "/mtheme/$name/images";
+  else if ($selector->in_code_only || $status == 'in code only') {
+    $feature = mtheme_get_feature($name);
+    $module_name = $feature->name;
+    $module_path = drupal_get_path('module', $module_name);
+    $path = $module_path . "/mtheme/$name/images";
   }
 
   return $path;
