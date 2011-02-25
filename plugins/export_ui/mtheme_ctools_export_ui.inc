@@ -99,7 +99,13 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#description' => t('Upload files to use in your CSS.'),
     );
     // Check for available files
-    $path = mtheme_images_path($selector); //Path to files dir or features module w files.
+    //
+    // If $selector is stored in code, $selector->in_code_only = TRUE.
+    // If $selector is stored in the database only, there is no $selector->in_code_only.
+    // Set $status, to indicate whether we want the path to the images directory in 
+    // the files directory or in a feature module.
+    $status = (property_exists($selector, 'in_code_only')) ? 'in code only' : 'files';
+    $path = mtheme_images_path($selector, $status); //Path to files dir or features module w files.
     $i = 0; // Use counter in case of conflicting $file->name values
     foreach (@file_scan_directory($path, '/.*/') as $file) {
       $title = "images/$file->filename";

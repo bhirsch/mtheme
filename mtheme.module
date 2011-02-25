@@ -612,25 +612,19 @@ function mtheme_features_files($export, $module_name) {
       $files_directory = $public->getDirectoryPath();
       $mtheme_path = $files_directory . '/mtheme/' . $name;
       // Get selector's CSS file
-      //$add_files[$i]->name = $module_name .'.'. $name;
       $add_files[$i]->name = $name;
-      //$add_files[$i]->basename = $module_name .'.'. $name .'.css';
-      $add_files[$i]->basename = $name . '.css';
-      //$add_files[$i]->filename = $mtheme_path .'/'. $name .'.css';
-      $add_files[$i]->filename = $mtheme_path . '/' . $name . '.css';
-      //$add_files[$i]->subdir = '';
+      $add_files[$i]->filename = $name . '.css';
+      $add_files[$i]->uri = $mtheme_path . '/' . $name . '.css';
       $add_files[$i]->subdir = 'mtheme/' . $name;
       // Check for images.
       $selector = mtheme_selector_load($name);
       $images_path = mtheme_images_path($selector);
-// @TODO Original below. Coder Update modified this function. Not sure it's right.
-// foreach (@file_scan_directory($images_path, '.*') as $file) {
       foreach (@file_scan_directory($images_path, '/.*/') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;
-        $add_files[$i]->basename = $file->basename;
-        $add_files[$i]->filename = $file->filename;
-        $add_files[$i]->subdir = 'mtheme/' . $name . '/images';
+        $add_files[$i]->filename = $file->filename; 
+        $add_files[$i]->uri = $file->uri;
+        $add_files[$i]->subdir = "mtheme/$name/images";
       }
       $i++;
     }
