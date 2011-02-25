@@ -323,19 +323,19 @@ function mtheme_images_path($selector = NULL, $status = 'files') {
  */
 function mtheme_get_feature($name) {
   $features = features_get_features();
-  $feature_with_mtheme = '';
+  $feature_with_selector = '';
 
   foreach ($features as $feature) {
     // Check for subthemes.
-    if ($feature->info['features']['mtheme_selector']) {
+    if (!empty($feature->info['features']['mtheme_selector'])) {
       foreach ($feature->info['features']['mtheme_selector'] as $mtheme_name) {
         if ($mtheme_name == $name) {
-          $feature_with_subtheme = $feature;
+          $feature_with_selector = $feature;
         }
       }
     }
   }
-  return $feature_with_subtheme;
+  return $feature_with_selector;
 }
 
 /**

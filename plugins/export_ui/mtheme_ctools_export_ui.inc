@@ -120,7 +120,7 @@ function mtheme_ctools_export_ui_form(&$form, &$form_state) {
     $form['files'] = array(
       '#type' => 'item',
       '#title' => t('Files'),
-      '#value' => t('Save then click Edit to add background files here.'),
+      '#description' => t('Save then click Edit to add background files here.'),
     );
   }
   $grp = ($selector) ? $selector->grp : ''; 
@@ -180,6 +180,7 @@ function mtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state) {
     else {
       // File upload failed.
       form_set_error('file_upload', t('The file could not be uploaded.'));
+      $form_state['values']['file_upload'] = FALSE; // TODO does this solve the undefined index error on submit? 
     }
   }
 }
@@ -205,14 +206,24 @@ function mtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   if ($file = $values['file_upload']) {
     unset($values['file_upload']);
     $source = $file->uri;
+    $destination = array();
     // Save file to selector-specific directory here:
     // files/$selector_name/images/imageX.jpg
-    $destination = mtheme_images_path($selector);
-    $filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
-    // Now make another copy available for compile.css here:
+    $destinations[1] = mtheme_images_path($selector);
+    // Make another copy available for compile.css here:
     // files/mtheme/compile/images.
-    $destination = mtheme_images_path($selector, 'compile');
-    $filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
+    $destinations[2] = mtheme_images_path($selector, 'compile');
+    foreach ($destinations as $destination) {
+      if (!file_prepare_directory($destination, FILE_CREATE_DIRECTORY)) {
+        $txt = t("!destination could not be created.", 
+               array('!destination' => $destination));
+        drupal_set_message($txt);
+      }
+      if ($filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE)) {
+        $txt = t("New file saved: ") . l($filename, $filename);
+        drupal_set_message($txt);
+      }
+    }
   }
 
   // If the selector is being overridden (stored in a module and now modified 
@@ -267,10 +278,9 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   file_unmanaged_delete($path);
   // delete image files
   $path = mtheme_images_path($selector);
-  // TODO Double check. Original below. I'm not sure about Coder update's change here.
   //foreach (@file_scan_directory($path, '.*') as $file) {
   foreach (@file_scan_directory($path, '/.*/') as $file) {
-    file_delete($file->filename);
+    file_unmanaged_delete($file->filename);
   }
   // remove directories
   $path = $files_directory . "/mtheme/$name/images";
