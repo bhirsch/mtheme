@@ -126,11 +126,9 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
-//----------------------------------------------//
-// mtheme                                       //
-//----------------------------------------------//
-
 /**
+ * Implements hook_init().
+ * 
  * Add mtheme css files.
  *
  * Get all mtheme selectors
@@ -214,6 +212,9 @@ function mtheme_init() {
 
 }
 
+//----------------------------------------------//
+// mtheme                                       //
+//----------------------------------------------//
 
 /**
  * Get the path to compile.css, a single stylesheet including all the 
@@ -235,7 +236,7 @@ function mtheme_get_compiled_css($type = 'relative') {
   $path = $files_directory . '/mtheme/compile/compile.css';
   // Build absolute URL.  
   if ($type == 'url') {
-    $path = file_create_url($files_directory);
+    $path = file_create_url($path);
   }
   return $path;
 }
