@@ -301,8 +301,7 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   }
   // Remove images directory.
   if (file_prepare_directory($path)) {
-    //$result = drupal_rmdir($path);
-    $result = rmdir($path);
+    $result = drupal_rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
       drupal_set_message($txt);
@@ -315,8 +314,7 @@ function mtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state
   $path = file_build_uri("/mtheme/$name");
   $path = file_stream_wrapper_uri_normalize($path);
   if (file_prepare_directory($path)) {
-    //$result = drupal_rmdir($path);
-    $result = rmdir($path);
+    $result = drupal_rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
       drupal_set_message($txt);
