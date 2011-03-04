@@ -1,7 +1,5 @@
-// $Id$
-
-Module Theme (version 1.x)
-----------------------------
+Module Theme version 6.x-1.x
+------------------------------
 The Module Theme module enables you to:
 - Theme your website through Drupal's web interface
 - Export theme elements with the Features module
