@@ -22,19 +22,12 @@ The Module Theme module enables you to:
 Installation 
 ---------------
 Place the entire mtheme folder into your modules directory.
-Go to Administer -> Site building -> Modules and enable the Module Theme
+Go to Administer -> Modules and enable the Module Theme
 module. 
 
 To "mtheme-enable" any theme on your site, copy and paste the following 
 snippet of code into the bottom of your theme(s) template.php file
 (below the last function in the file): 
-
-/**
- * Add Module Theme CSS.
- */
-if (module_exists('mtheme')) {
-  mtheme_add_css();  
-}
 
 Use 
 ----------
