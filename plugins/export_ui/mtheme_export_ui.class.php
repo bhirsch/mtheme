@@ -53,10 +53,11 @@ class mtheme_export_ui extends ctools_export_ui {
     $this->rows["{$group}:{$name}"]['data'] = array();
     $this->rows["{$group}:{$name}"]['class'] = !empty($item->disabled) ? 'ctools-export-ui-disabled' : 'ctools-export-ui-enabled';
 
-$output = '<div subtheme-export-ui-title>/*** '. check_plain($item->title) .', '. check_plain($name) .' ***/</div>';
-$output .= '<div subtheme-export-ui-css-selector>'. check_plain($item->css_selector) .'</div>';
-//$output = check_plain($name) .' ('. check_plain($item->css_selector) .')';
-$output .= "<div class='description'>" . check_plain($item->description) . "</div>";
+    $title = ($item->title) ? check_plain($item->title) .', '. check_plain($name) : check_plain($name);
+    $output = '<div subtheme-export-ui-title>/*** '. $title .' ***/</div>';
+    $output .= '<div subtheme-export-ui-css-selector>'. check_plain($item->css_selector) .'</div>';
+    //$output = check_plain($name) .' ('. check_plain($item->css_selector) .')';
+    $output .= "<div class='description'>" . check_plain($item->description) . "</div>";
 
     $this->rows["{$group}:{$name}"]['data'][] = array(
       'data' => $output,
