@@ -191,3 +191,50 @@ function mtheme_write_css($css, $compile = FALSE) {
 
   drupal_set_message($txt);
 }
+
+/**
+ * @param $module
+ *  String. Name of the module being enabled or disabled.
+ */
+function _mtheme_please_enable($module){
+  _mtheme_recompile_css($module, 'enable');
+}
+
+/**
+ * @param $module
+ *  String. Name of the module being enabled or disabled.
+ */
+function _mtheme_please_disable($module){
+  _mtheme_recompile_css($module, 'disable');
+}
+
+/**
+ * Recompile mtheme.css.
+ * 
+ * @param $module
+ *  String. Name of the module being enabled or disabled.
+ * 
+ * @param $state
+ *  String. 'enable' or 'disable'.
+ */
+function _mtheme_recompile_css($module, $state) {
+  // Get selector objects being enabled.
+  $path = drupal_get_path('module', $module);
+  $file = $path .'/whitehouse_mtheme.info';
+  $info = drupal_parse_info_file($file);
+  $mtheme_selectors = $info['features']['mtheme_selector'];
+  // Check each selector.
+  foreach ($mtheme_selectors as $name) {
+    $selector = mtheme_selector_load($name);
+    $selector->disabled = ($state == 'disable') ? TRUE : FALSE;
+    // Build mtheme cache.
+    // Recompile and rewrite CSS.
+    $compile = TRUE;
+    mtheme_css($selector, $compile);
+    // Copy any files to images directory.
+    $paths = array();
+    $paths['from'] = mtheme_images_path($selector);
+    $paths['to'] = mtheme_images_path($selector, 'mtheme');
+    mtheme_copy_files($selector, $paths);
+  } 
+}

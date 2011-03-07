@@ -112,6 +112,26 @@ function mtheme_form_alter(&$form, &$form_state, $form_id) {
 //----------------------------------------------//
 
 /**
+ * @param $module
+ *  String. Name of the module being enabled or disabled.
+ */
+function mtheme_please_enable($module) {
+  // If compile is enabled, rewrite mtheme.css.  
+  ctools_include('css', 'mtheme'); // include includes/css.inc
+  _mtheme_please_enable($module);
+}
+
+/**
+ * @param $module
+ *  String. Name of the module being enabled or disabled.
+ */
+function mtheme_please_disable($module) {
+  // If compile is enabled, rewrite mtheme.css.  
+  ctools_include('css', 'mtheme'); // include includes/css.inc
+  _mtheme_please_disable($module);
+}
+
+/**
  * Add mtheme css files.
  *
  * Get all mtheme selectors

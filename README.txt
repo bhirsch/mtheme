@@ -16,17 +16,17 @@ The Module Theme module enables you to:
 
 Installation 
 ---------------
-Place the entire mtheme folder into your modules directory.
-Go to Administer -> Site building -> Modules and enable the Module Theme
-module. 
+1. Place the entire mtheme folder into your modules directory.
+   Go to Administer -> Site building -> Modules and enable the Module Theme
+   module. 
 
-To "mtheme-enable" any theme on your site, copy and paste the following 
-snippet of code into the bottom of your theme(s) template.php file
-(below the last function in the file): 
+2. In Drupal 6, to "mtheme-enable" any theme on your site, copy and paste the following 
+   snippet of code into the bottom of your theme(s) template.php file
+   (below the last function in the file): 
 
-if (module_exists('mtheme')) {
-  mtheme_add_css();  
-}
+   if (module_exists('mtheme')) {
+     mtheme_add_css();  
+   }
 
 Use 
 ----------
@@ -56,6 +56,26 @@ Administer -> Site building -> Features -> Create Feature
 Under Edit Components select Module Theme, then select the components (CSS selectors)
 you want to export. When you're done click Download feature. Now your CSS is 
 included in the module you just downloaded.
+
+Note: In Drupal 6, the Module Theme module has no way of listening for newly enabled  
+mtheme components. If 'compile CSS' is turned on, newly enabled modules
+will be ignored until mtheme.css (the equivalent of compile.css in D7) is 
+re-written. There's an easy fix though. Copy and paste this implementation of 
+hook_enable() and hook_disable() into your feature module's .module file: 
+
+/**
+ * Implmentation of hook_enable().
+ */
+function mtheme_enable() {
+  mtheme_please_enable('mymodule');  
+}
+
+/**
+ * Implmentation of hook_disable().
+ */
+function mtheme_disable() {
+  mtheme_please_disable('mymodule');  
+}
 
 There are a few different ways to include theming in your custom modules
 after exporting as described above:
